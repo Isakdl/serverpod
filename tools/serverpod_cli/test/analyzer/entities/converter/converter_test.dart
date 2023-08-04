@@ -26,8 +26,6 @@ main() {
         print('Negated key with value: $key');
       },
     );
-
-    print('yamlMap: $yamlMap');
   });
 
   
@@ -54,7 +52,5 @@ main() {
         print('Negated key with value: $key');
       },
     );
-
-    print('yamlMap: $yamlMap');
   });
 }
