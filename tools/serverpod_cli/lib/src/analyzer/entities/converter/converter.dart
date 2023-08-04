@@ -108,9 +108,12 @@ Iterable<Map<YamlScalar, YamlNode>> _extractKeyValuePairs(
   void Function(String key, SourceSpan? span)? onNegatedKeyWithValue,
   required DeepNestedNodeHandler handleDeepNestedNodes,
 }) {
+  print('fieldOptions');
   if (content == null) return [];
 
-  var fieldPairs = fieldOptions.map((stringifiedKeyValuePair) {
+  List<Map<YamlScalar, YamlNode>> fieldPairs = [];
+
+  for (var stringifiedKeyValuePair in fieldOptions) {
     var keyValueSpan = _extractSubSpan(content, span, stringifiedKeyValuePair);
 
     if (_hasNestedStringifiedValues(stringifiedKeyValuePair)) {
@@ -121,16 +124,18 @@ Iterable<Map<YamlScalar, YamlNode>> _extractKeyValuePairs(
       var stringifiedContent = nestedComponents.last;
 
       if (stringifiedContent == '') {
-        return _createdYamlScalarNode(
+        fieldPairs.add(_createdYamlScalarNode(
           key,
           null,
           keyValueSpan,
-        );
+        ));
+        continue;
       } else {
         var nestedSpan = _extractSubSpan(content, span, stringifiedContent);
         var nodeMap = handleDeepNestedNodes(stringifiedContent, nestedSpan);
 
-        return _createYamlMapNode(key, nodeMap, keyValueSpan);
+        fieldPairs.add(_createYamlMapNode(key, nodeMap, keyValueSpan));
+        continue;
       }
     }
 
@@ -155,13 +160,15 @@ Iterable<Map<YamlScalar, YamlNode>> _extractKeyValuePairs(
       }
     }
 
-    return _createdYamlScalarNode(
+    fieldPairs.add(_createdYamlScalarNode(
       key,
       value,
       keyValueSpan,
-    );
-  });
+    ));
+    continue;
+  }
 
+  print(fieldPairs);
   return fieldPairs;
 }
 
