@@ -2,18 +2,18 @@ import 'package:serverpod_cli/analyzer.dart';
 import 'package:serverpod_cli/src/generator/code_generation_collector.dart';
 import 'package:serverpod_cli/src/util/protocol_helper.dart';
 
-class _ProtocolState {
+class ProtocolState {
   ProtocolSource source;
   List<SourceSpanException> errors = [];
   SerializableEntityDefinition? entity;
 
-  _ProtocolState({
+  ProtocolState({
     required this.source,
   });
 }
 
 class StatefulAnalyzer {
-  final Map<String, _ProtocolState> _protocolStates = {};
+  final Map<String, ProtocolState> _protocolStates = {};
   List<SerializableEntityDefinition> _entities = [];
 
   Function(Uri, CodeGenerationCollector)? _onErrorsChangedNotifier;
@@ -23,7 +23,7 @@ class StatefulAnalyzer {
     Function(Uri, CodeGenerationCollector)? onErrorsChangedNotifier,
   ]) {
     for (var yamlSource in sources) {
-      _protocolStates[yamlSource.yamlSourceUri.path] = _ProtocolState(
+      _protocolStates[yamlSource.yamlSourceUri.path] = ProtocolState(
         source: yamlSource,
       );
     }
@@ -46,6 +46,9 @@ class StatefulAnalyzer {
       .map((state) => state.entity)
       .whereType<SerializableEntityDefinition>()
       .toList();
+
+  /// Returns all parsed entities, valid or not.
+  List<SerializableEntityDefinition> get entities => _entities;
 
   /// Runs the validation on a single protocol. The protocol must exist in the
   /// state, if not this returns the last validated state.
@@ -71,7 +74,7 @@ class StatefulAnalyzer {
   /// it to the caller. Please note that [validateAll] should be called to
   /// guarantee that all errors are found.
   void addYamlProtocol(ProtocolSource yamlSource) {
-    var protocolState = _ProtocolState(
+    var protocolState = ProtocolState(
       source: yamlSource,
     );
 
@@ -86,6 +89,13 @@ class StatefulAnalyzer {
     _entities.removeWhere(
       (entity) => entity.sourceFileName == protocolUri.path,
     );
+  }
+
+  ProtocolState readYamlProtocol(Uri uri) {
+    var protocol = _protocolStates[uri.path];
+    if (protocol == null) throw Error();
+
+    return protocol;
   }
 
   /// Checks if a protocol is registered in the state.

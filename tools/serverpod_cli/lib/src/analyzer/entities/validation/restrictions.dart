@@ -554,7 +554,7 @@ class Restrictions {
     var duplicateFieldErrors = duplicatesCount.entries
         .where((entry) => entry.value > 1)
         .map((entry) => SourceSpanSeverityException(
-              'Duplicated field name "name", can only reference a field once per index.',
+              'Duplicated field name "${entry.key}", can only reference a field once per index.',
               span,
             ));
 

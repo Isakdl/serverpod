@@ -5,6 +5,7 @@ import 'package:lsp_server/lsp_server.dart';
 import 'package:serverpod_cli/src/analyzer/code_analysis_collector.dart';
 import 'package:serverpod_cli/src/analyzer/entities/stateful_analyzer.dart';
 import 'package:serverpod_cli/src/language_server/diagnostics_source.dart';
+import 'package:serverpod_cli/src/language_server/protocol_completer.dart';
 import 'package:serverpod_cli/src/util/directory.dart';
 import 'package:serverpod_cli/src/util/protocol_helper.dart';
 
@@ -37,6 +38,10 @@ Future<void> runLanguageServer() async {
     return InitializeResult(
       capabilities: ServerCapabilities(
         textDocumentSync: const Either2.t1(TextDocumentSyncKind.Full),
+        completionProvider: CompletionOptions(
+          resolveProvider: true,
+          triggerCharacters: [':', '=', ' '],
+        ),
       ),
     );
   });
@@ -110,6 +115,22 @@ Future<void> runLanguageServer() async {
     );
   });
 
+  connection.onCompletion((params) async {
+    var server = serverProject;
+    if (server == null) return CompletionList(isIncomplete: false, items: []);
+
+    var protocol = server.analyzer.readYamlProtocol(params.textDocument.uri);
+    return ProtocolCompleter.createCompletionList(
+      params.position,
+      protocol,
+      server.analyzer.entities,
+    );
+  });
+
+  connection.onCompletionResolve((params) async {
+    return params;
+  });
+
   await connection.listen();
 }
 
@@ -172,12 +193,12 @@ void _reportDiagnosticErrors(
   CodeGenerationCollector errors,
 ) {
   var diagnostics = _convertErrorsToDiagnostic(errors);
-  connection.sendDiagnostics(
+  /*connection.sendDiagnostics(
     PublishDiagnosticsParams(
       diagnostics: diagnostics,
       uri: filePath,
     ),
-  );
+  );*/
 }
 
 List<Diagnostic> _convertErrorsToDiagnostic(
