@@ -5,7 +5,6 @@ import 'extensions.dart';
 DatabaseMigration generateDatabaseMigration({
   required DatabaseDefinition srcDatabase,
   required DatabaseDefinition dstDatabase,
-  required int priority,
 }) {
   var warnings = <DatabaseMigrationWarning>[];
   var actions = <DatabaseMigrationAction>[];
@@ -85,7 +84,6 @@ DatabaseMigration generateDatabaseMigration({
   return DatabaseMigration(
     actions: actions,
     warnings: warnings,
-    priority: priority,
     migrationApiVersion: DatabaseConstants.migrationApiVersion,
   );
 }

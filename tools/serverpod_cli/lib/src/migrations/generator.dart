@@ -103,12 +103,10 @@ class MigrationGenerator {
 
   Future<DatabaseDefinition> _getSourceDatabaseDefinition(
     String? latestVersion,
-    int priority,
   ) async {
     if (latestVersion == null) {
       return DatabaseDefinition(
         tables: [],
-        priority: priority,
         migrationApiVersion: DatabaseConstants.migrationApiVersion,
       );
     }
@@ -120,29 +118,23 @@ class MigrationGenerator {
   Future<MigrationVersion?> createMigration({
     String? tag,
     required bool force,
-    required GeneratorConfig config,
     bool write = true,
   }) async {
-    int priority = migrationPriority(config);
-
     var migrationRegistry = await MigrationRegistry.load(
       migrationsProjectDirectory,
     );
 
     var srcDatabase = await _getSourceDatabaseDefinition(
       migrationRegistry.getLatest(),
-      priority,
     );
 
     var dstDatabase = await generateDatabaseDefinition(
       directory: directory,
-      priority: priority,
     );
 
     var migration = generateDatabaseMigration(
       srcDatabase: srcDatabase,
       dstDatabase: dstDatabase,
-      priority: priority,
     );
 
     var warnings = migration.warnings;
@@ -175,23 +167,6 @@ class MigrationGenerator {
     return migrationVersion;
   }
 
-  int migrationPriority(GeneratorConfig config) {
-    int priority;
-    var packageType = config.type;
-    switch (packageType) {
-      case PackageType.internal:
-        priority = 0;
-        break;
-      case PackageType.module:
-        priority = 1;
-        break;
-      case PackageType.server:
-        priority = 2;
-        break;
-    }
-    return priority;
-  }
-
   Future<bool> repairMigration({
     String? tag,
     required bool force,
@@ -221,7 +196,6 @@ class MigrationGenerator {
     var migration = generateDatabaseMigration(
       srcDatabase: liveDatabase,
       dstDatabase: dstDatabase,
-      priority: 0,
     );
 
     var warnings = migration.warnings;
@@ -281,7 +255,8 @@ class MigrationGenerator {
   }
 
   DatabaseDefinition createDatabaseDefinitionFromTables(
-      Map<String, MigrationVersion> versions) {
+    Map<String, MigrationVersion> versions,
+  ) {
     var migrationDefinitions =
         versions.values.map((e) => e.databaseDefinition).toList();
     var dstDatabase = DatabaseDefinition(
@@ -393,7 +368,6 @@ class MigrationVersion {
   final String versionName;
   final DatabaseMigration migration;
   final DatabaseDefinition databaseDefinition;
-  int get priority => migration.priority;
 
   static Future<MigrationVersion> load({
     required String versionName,

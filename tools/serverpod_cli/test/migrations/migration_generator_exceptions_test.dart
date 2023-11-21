@@ -23,7 +23,7 @@ void main() {
     group('when creating migration', () {
       test('then migration registry load exception is thrown.', () async {
         expect(
-          generator.createMigration(force: false, priority: 0),
+          generator.createMigration(force: false),
           throwsA(
             isA<MigrationRegistryLoadException>().having(
                 (e) => e.directoryPath,
@@ -65,7 +65,7 @@ void main() {
     group('when creating migration', () {
       test('then migration version load exception is thrown.', () async {
         expect(
-          generator.createMigration(force: false, priority: 0),
+          generator.createMigration(force: false),
           throwsA(isA<MigrationVersionLoadException>()
               .having((e) => e.moduleName, 'Matching module name',
                   equals(projectName))

@@ -177,7 +177,7 @@ class MigrationManager {
       }
     }
 
-    migrations.sort((a, b) => a.priority.compareTo(b.priority));
+    // TODO: probably here we need to merge migrations -- FIX ME --
 
     for (var migration in migrations) {
       await migrateToLatestModule(session, migration.module);
@@ -232,10 +232,6 @@ class Migration {
 
   /// The module associated with the migration.
   final String module;
-
-  /// The priority of the migration. Migrations with lower priority will be
-  /// applied first.
-  int get priority => migration.priority;
 
   /// Loads the specified migration version from the migrations directory.
   static Future<Migration> load(String module, String version) async {

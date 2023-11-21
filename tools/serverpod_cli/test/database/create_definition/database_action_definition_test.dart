@@ -87,10 +87,6 @@ void main() {
     }, skip: tablesDoNotExist);
 
     group('when generating sql code', () {
-      // TODO: fix this, not sure what this does or why it is not set in the
-      // definition creator ?! But code generator crashes without it.
-      databaseDefinition.priority = 1;
-
       var sql = databaseDefinition.toPgSql(
         version: 'version',
         module: 'mock',

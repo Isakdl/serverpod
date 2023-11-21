@@ -69,7 +69,6 @@ class CreateMigrationCommand extends ServerpodCommand {
         migration = await generator.createMigration(
           tag: tag,
           force: force,
-          config: config,
         );
       } on MigrationVersionLoadException catch (e) {
         log.error(
