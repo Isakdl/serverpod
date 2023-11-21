@@ -9,18 +9,22 @@ class DatabaseSetup {
   static Future<bool> createDefaultMigration(Directory dir, String name) async {
     log.debug('Creating default migration.');
 
+    var config = await GeneratorConfig.load(dir.path);
+    if (config == null) {
+      throw StateError('Unable to load project configuration.');
+    }
+
     var generator = MigrationGenerator(
       directory: dir,
       projectName: name,
     );
 
-    var migration = await generator.createMigration(
-      tag: 'initial',
-      force: true,
-      priority: 0,
+    await generator.createMigration(
+      force: false,
+      config: config,
     );
 
-    return migration != null;
+    return true;
   }
 
   static Future<bool> applyDefaultMigration(Directory dir) async {

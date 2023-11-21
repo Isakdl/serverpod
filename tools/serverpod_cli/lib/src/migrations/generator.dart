@@ -120,9 +120,11 @@ class MigrationGenerator {
   Future<MigrationVersion?> createMigration({
     String? tag,
     required bool force,
-    required int priority,
+    required GeneratorConfig config,
     bool write = true,
   }) async {
+    int priority = migrationPriority(config);
+
     var migrationRegistry = await MigrationRegistry.load(
       migrationsProjectDirectory,
     );
@@ -171,6 +173,23 @@ class MigrationGenerator {
     }
 
     return migrationVersion;
+  }
+
+  int migrationPriority(GeneratorConfig config) {
+    int priority;
+    var packageType = config.type;
+    switch (packageType) {
+      case PackageType.internal:
+        priority = 0;
+        break;
+      case PackageType.module:
+        priority = 1;
+        break;
+      case PackageType.server:
+        priority = 2;
+        break;
+    }
+    return priority;
   }
 
   Future<bool> repairMigration({
