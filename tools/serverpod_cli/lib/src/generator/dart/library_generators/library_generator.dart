@@ -77,8 +77,9 @@ class LibraryGenerator {
             ..name = 'targetDatabaseDefinition'
             ..static = true
             ..modifier = FieldModifier.final$
-            ..assignment =
-                createDatabaseDefinitionFromEntities(entities).toCode(
+            ..assignment = createDatabaseDefinitionFromEntities(
+                    entities, [], config) // TODO move out!
+                .toCode(
               config: config,
               serverCode: serverCode,
               additionalTables: [

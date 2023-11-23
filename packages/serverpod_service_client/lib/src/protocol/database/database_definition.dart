@@ -16,14 +16,14 @@ abstract class DatabaseDefinition extends _i1.SerializableEntity {
   DatabaseDefinition._({
     this.name,
     required this.tables,
-    this.installedModules,
+    required this.installedModules,
     required this.migrationApiVersion,
   });
 
   factory DatabaseDefinition({
     String? name,
     required List<_i2.TableDefinition> tables,
-    List<_i2.DatabaseMigrationVersion>? installedModules,
+    required List<_i2.DatabaseMigrationVersion> installedModules,
     required int migrationApiVersion,
   }) = _DatabaseDefinitionImpl;
 
@@ -37,7 +37,7 @@ abstract class DatabaseDefinition extends _i1.SerializableEntity {
       tables: serializationManager
           .deserialize<List<_i2.TableDefinition>>(jsonSerialization['tables']),
       installedModules:
-          serializationManager.deserialize<List<_i2.DatabaseMigrationVersion>?>(
+          serializationManager.deserialize<List<_i2.DatabaseMigrationVersion>>(
               jsonSerialization['installedModules']),
       migrationApiVersion: serializationManager
           .deserialize<int>(jsonSerialization['migrationApiVersion']),
@@ -53,7 +53,7 @@ abstract class DatabaseDefinition extends _i1.SerializableEntity {
 
   /// Modules installed in the database, together with their version. Only
   /// set if known.
-  List<_i2.DatabaseMigrationVersion>? installedModules;
+  List<_i2.DatabaseMigrationVersion> installedModules;
 
   /// The version of the database definition.
   int migrationApiVersion;
@@ -81,7 +81,7 @@ class _DatabaseDefinitionImpl extends DatabaseDefinition {
   _DatabaseDefinitionImpl({
     String? name,
     required List<_i2.TableDefinition> tables,
-    List<_i2.DatabaseMigrationVersion>? installedModules,
+    required List<_i2.DatabaseMigrationVersion> installedModules,
     required int migrationApiVersion,
   }) : super._(
           name: name,
@@ -94,15 +94,13 @@ class _DatabaseDefinitionImpl extends DatabaseDefinition {
   DatabaseDefinition copyWith({
     Object? name = _Undefined,
     List<_i2.TableDefinition>? tables,
-    Object? installedModules = _Undefined,
+    List<_i2.DatabaseMigrationVersion>? installedModules,
     int? migrationApiVersion,
   }) {
     return DatabaseDefinition(
       name: name is String? ? name : this.name,
       tables: tables ?? this.tables.clone(),
-      installedModules: installedModules is List<_i2.DatabaseMigrationVersion>?
-          ? installedModules
-          : this.installedModules?.clone(),
+      installedModules: installedModules ?? this.installedModules.clone(),
       migrationApiVersion: migrationApiVersion ?? this.migrationApiVersion,
     );
   }

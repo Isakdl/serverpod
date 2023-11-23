@@ -12,6 +12,7 @@ class DatabaseAnalyzer {
   /// Analyze the structure of the [database].
   static Future<DatabaseDefinition> analyze(Database database) async {
     return DatabaseDefinition(
+      installedModules: await _getInstalledMigrationVersions(database),
       name: (await database.unsafeQuery('SELECT current_database();'))
           .first
           .first,
@@ -163,6 +164,19 @@ WHERE contype = 'f' AND t.relname = '$tableName' AND nt.nspname = '$schemaName';
       })),
       migrationApiVersion: DatabaseConstants.migrationApiVersion,
     );
+  }
+
+  /// Retrieves a list of installed database migrations.
+  static Future<List<DatabaseMigrationVersion>> _getInstalledMigrationVersions(
+    Database database,
+  ) async {
+    try {
+      return database.find<DatabaseMigrationVersion>();
+    } catch (e) {
+      // Ignore if the table does not exist.
+      stderr.writeln('Failed to get installed migrations: $e');
+      return [];
+    }
   }
 
   /// Retrieves a list of installed database migrations.

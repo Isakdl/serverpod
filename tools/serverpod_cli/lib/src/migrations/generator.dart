@@ -10,6 +10,8 @@ import 'package:serverpod_shared/serverpod_shared.dart';
 import 'package:serverpod_cli/src/logger/logger.dart';
 import 'package:serverpod_service_client/serverpod_service_client.dart';
 
+import '../util/protocol_helper.dart';
+
 const _fileNameMigrationJson = 'migration.json';
 const _fileNameDefinitionJson = 'definition.json';
 const _fileNameMigrationSql = 'migration.sql';
@@ -66,6 +68,7 @@ class MigrationGenerator {
     );
     try {
       return await MigrationVersion.load(
+        moduleName: module,
         versionName: versionName,
         migrationsDirectory: migrationsDirectory,
       );
@@ -101,13 +104,27 @@ class MigrationGenerator {
     );
   }
 
+  Future<List<MigrationVersion>> getAllMigrationVersions(
+    List<String> modules,
+  ) async {
+    var versions = <Future<MigrationVersion?>>[];
+    for (var module in modules) {
+      var moduleVersions = getLatestMigrationVersion(module);
+      versions.add(moduleVersions);
+    }
+    var resolved = await Future.value(versions);
+    return resolved.whereType<MigrationVersion>().toList();
+  }
+
   Future<DatabaseDefinition> _getSourceDatabaseDefinition(
     String? latestVersion,
+    List<DatabaseMigrationVersion> installedModules,
   ) async {
     if (latestVersion == null) {
       return DatabaseDefinition(
         tables: [],
         migrationApiVersion: DatabaseConstants.migrationApiVersion,
+        installedModules: installedModules,
       );
     }
 
@@ -118,23 +135,39 @@ class MigrationGenerator {
   Future<MigrationVersion?> createMigration({
     String? tag,
     required bool force,
+    required GeneratorConfig config,
     bool write = true,
   }) async {
     var migrationRegistry = await MigrationRegistry.load(
       migrationsProjectDirectory,
     );
 
-    var srcDatabase = await _getSourceDatabaseDefinition(
+    var protocols =
+        await ProtocolHelper.loadProjectYamlProtocolsFromDisk(config);
+
+    var moduleNames = config.modules.map((module) => module.name).toList();
+    var migrationVersions = await getAllMigrationVersions(moduleNames);
+    var installedModules = migrationVersions.map((m) {
+      return DatabaseMigrationVersion(
+        module: m.moduleName,
+        version: m.versionName,
+      );
+    }).toList();
+
+    var databaseSource = await _getSourceDatabaseDefinition(
       migrationRegistry.getLatest(),
+      installedModules,
     );
 
-    var dstDatabase = await generateDatabaseDefinition(
-      directory: directory,
+    var databaseDestination = generateDatabaseDefinition(
+      config: config,
+      installedModules: installedModules,
+      protocols: protocols,
     );
 
     var migration = generateDatabaseMigration(
-      srcDatabase: srcDatabase,
-      dstDatabase: dstDatabase,
+      srcDatabase: databaseSource,
+      dstDatabase: databaseDestination,
     );
 
     var warnings = migration.warnings;
@@ -152,16 +185,24 @@ class MigrationGenerator {
 
     var versionName = createVersionName(tag);
     var migrationVersion = MigrationVersion(
+      moduleName: projectName,
       migrationsDirectory: migrationsProjectDirectory,
       versionName: versionName,
       migration: migration,
-      databaseDefinition: dstDatabase,
+      databaseDefinition: databaseDestination,
     );
 
+    // TODO merge all definitions from all dependencies
+
+    // TODO create SQL content
+
     if (write) {
+      // DO NOT WRITE SQL IN HERE
       await migrationVersion.write(module: projectName);
       migrationRegistry.add(versionName);
       await migrationRegistry.write();
+
+      // TODO add writing sql
     }
 
     return migrationVersion;
@@ -260,10 +301,30 @@ class MigrationGenerator {
     var migrationDefinitions =
         versions.values.map((e) => e.databaseDefinition).toList();
     var dstDatabase = DatabaseDefinition(
-      tables: migrationDefinitions.expand((e) => e.tables).toList(),
-      migrationApiVersion: DatabaseConstants.migrationApiVersion,
-    );
+        tables: migrationDefinitions.expand((e) => e.tables).toList(),
+        migrationApiVersion: DatabaseConstants.migrationApiVersion,
+        installedModules: [] // TODO: Add installed modules, THIS IS FOR THE ENTIRE DIFF do we need it? yes we do since we have to write to the database!
+        // We should be able to create this from MigrationVersion ?!?! It is a list of DatabaseMigrationVersion
+        );
     return dstDatabase;
+  }
+
+  Future<Map<String, MigrationVersion>>
+      loadLatestMigrationVersionsFromAllModules() async {
+    var versions = <String, MigrationVersion>{};
+
+    var modules = getMigrationModules();
+
+    for (var module in modules) {
+      var version = await getLatestMigrationVersion(module);
+
+      if (version == null) {
+        continue;
+      }
+
+      versions[module] = version;
+    }
+    return versions;
   }
 
   Future<Map<String, MigrationVersion>> loadMigrationVersionsFromAllModules({
@@ -358,12 +419,14 @@ class MigrationGenerator {
 
 class MigrationVersion {
   MigrationVersion({
+    required this.moduleName,
     required this.migrationsDirectory,
     required this.versionName,
     required this.migration,
     required this.databaseDefinition,
   });
 
+  final String moduleName;
   final Directory migrationsDirectory;
   final String versionName;
   final DatabaseMigration migration;
@@ -372,6 +435,7 @@ class MigrationVersion {
   static Future<MigrationVersion> load({
     required String versionName,
     required Directory migrationsDirectory,
+    required String moduleName,
   }) async {
     var versionDir = Directory(
       path.join(migrationsDirectory.path, versionName),
@@ -401,6 +465,7 @@ class MigrationVersion {
     );
 
     return MigrationVersion(
+      moduleName: moduleName,
       migrationsDirectory: migrationsDirectory,
       versionName: versionName,
       migration: migrationDefinition,

@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:serverpod_cli/analyzer.dart';
 import 'package:serverpod_cli/src/commands/create_repair_migration.dart';
+import 'package:serverpod_cli/src/test_util/builders/generator_config_builder.dart';
 import 'package:serverpod_shared/serverpod_shared.dart';
 import 'package:test/test.dart';
 
 void main() {
   var testAssetsPath = path.join('test', 'migrations', 'test_assets');
+  var config = GeneratorConfigBuilder().build();
 
   group('Given a corrupt migration registry file', () {
     var projectDirectory = Directory(path.join(
@@ -23,7 +25,7 @@ void main() {
     group('when creating migration', () {
       test('then migration registry load exception is thrown.', () async {
         expect(
-          generator.createMigration(force: false),
+          generator.createMigration(force: false, config: config),
           throwsA(
             isA<MigrationRegistryLoadException>().having(
                 (e) => e.directoryPath,
@@ -65,7 +67,7 @@ void main() {
     group('when creating migration', () {
       test('then migration version load exception is thrown.', () async {
         expect(
-          generator.createMigration(force: false),
+          generator.createMigration(force: false, config: config),
           throwsA(isA<MigrationVersionLoadException>()
               .having((e) => e.moduleName, 'Matching module name',
                   equals(projectName))

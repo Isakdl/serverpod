@@ -1,3 +1,4 @@
+import 'package:serverpod_cli/analyzer.dart';
 import 'package:serverpod_cli/src/analyzer/entities/definitions.dart';
 import 'package:serverpod_shared/serverpod_shared.dart';
 import 'package:serverpod_service_client/serverpod_service_client.dart';
@@ -5,6 +6,8 @@ import 'package:serverpod_service_client/serverpod_service_client.dart';
 /// Create the target [DatabaseDefinition] based on the [serializableEntities].
 DatabaseDefinition createDatabaseDefinitionFromEntities(
   List<SerializableEntityDefinition> serializableEntities,
+  List<DatabaseMigrationVersion> installedModules,
+  GeneratorConfig config,
 ) {
   var tables = <TableDefinition>[
     for (var classDefinition in serializableEntities)
@@ -14,6 +17,7 @@ DatabaseDefinition createDatabaseDefinitionFromEntities(
           name: classDefinition.tableName!,
           dartName: classDefinition.className,
           schema: 'public',
+          module: config.name,
           columns: [
             for (var column in classDefinition.fields)
               if (column.shouldSerializeFieldForDatabase(true))
@@ -67,6 +71,7 @@ DatabaseDefinition createDatabaseDefinitionFromEntities(
   return DatabaseDefinition(
     tables: tables,
     migrationApiVersion: DatabaseConstants.migrationApiVersion,
+    installedModules: installedModules,
   );
 }
 

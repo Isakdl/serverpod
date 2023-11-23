@@ -169,6 +169,9 @@ class MigrationManager {
   Future<void> migrateToLatest(Session session) async {
     var migrations = <Migration>[];
 
+
+    // TODO change to just my own SQL file
+
     for (var module in availableModules) {
       if (!isLatestInstalled(module)) {
         var latest = getLatestVersion(module);

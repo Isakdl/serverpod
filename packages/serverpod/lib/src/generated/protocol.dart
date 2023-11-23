@@ -137,6 +137,7 @@ class Protocol extends _i1.SerializationManagerServer {
   static final Protocol _instance = Protocol._();
 
   static final targetDatabaseDefinition = _i2.DatabaseDefinition(
+    installedModules: [],
     tables: [
       _i2.TableDefinition(
         name: 'serverpod_auth_key',
@@ -1815,13 +1816,6 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List)
           .map((e) => deserialize<_i60.TableDefinition>(e))
           .toList() as dynamic;
-    }
-    if (t == _i1.getType<List<_i60.DatabaseMigrationVersion>?>()) {
-      return (data != null
-          ? (data as List)
-              .map((e) => deserialize<_i60.DatabaseMigrationVersion>(e))
-              .toList()
-          : null) as dynamic;
     }
     if (t == List<_i60.DatabaseMigrationVersion>) {
       return (data as List)

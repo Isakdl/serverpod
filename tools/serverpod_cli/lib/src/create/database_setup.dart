@@ -21,6 +21,7 @@ class DatabaseSetup {
 
     await generator.createMigration(
       force: false,
+      config: config,
     );
 
     return true;

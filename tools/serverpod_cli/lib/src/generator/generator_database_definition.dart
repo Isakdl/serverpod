@@ -1,35 +1,19 @@
-import 'dart:io';
-
 import 'package:serverpod_cli/analyzer.dart';
 import 'package:serverpod_cli/src/analyzer/entities/stateful_analyzer.dart';
 import 'package:serverpod_cli/src/database/create_definition.dart';
 import 'package:serverpod_cli/src/util/protocol_helper.dart';
 import 'package:serverpod_service_client/serverpod_service_client.dart';
 
-Future<DatabaseDefinition> generateDatabaseDefinition({
-  required Directory directory,
+DatabaseDefinition generateDatabaseDefinition({
+  required GeneratorConfig config,
+  required List<DatabaseMigrationVersion> installedModules,
+  required List<ProtocolSource> protocols,
 }) {
-  return _generateSinglePackageDatabaseDefinition(
-    directory: directory,
-  );
-}
-
-Future<DatabaseDefinition> _generateSinglePackageDatabaseDefinition({
-  required Directory directory,
-}) async {
-  var config = await GeneratorConfig.load(directory.path);
-  if (config == null) {
-    throw Exception('Failed to load generator config');
-  }
-
-  var protocols = await ProtocolHelper.loadProjectYamlProtocolsFromDisk(config);
   var entityDefinitions = StatefulAnalyzer(protocols).validateAll();
 
-  var databaseDefinition = createDatabaseDefinitionFromEntities(
+  return createDatabaseDefinitionFromEntities(
     entityDefinitions,
+    installedModules,
+    config,
   );
-  for (var table in databaseDefinition.tables) {
-    table.module = config.name;
-  }
-  return databaseDefinition;
 }
