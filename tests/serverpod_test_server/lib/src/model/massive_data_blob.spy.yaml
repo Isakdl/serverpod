@@ -1,0 +1,153 @@
+class: MassiveDataBlob
+fields:
+  field1: int?
+  field2: bool
+  field3: double?
+  field4: DateTime
+  field5: String?
+  field6: List<int>
+  field7: Map<String, String>?
+  field8: Duration
+  field9: int?
+  field10: bool
+  field11: double
+  field12: DateTime?
+  field13: String
+  field14: List<double>?
+  field15: Map<String, int>
+  field16: Duration?
+  field17: int
+  field18: bool?
+  field19: double
+  field20: DateTime?
+  field21: String
+  field22: List<String>?
+  field23: Map<String, bool>
+  field24: Duration
+  field25: int?
+  field26: bool
+  field27: double
+  field28: DateTime?
+  field29: String
+  field30: List<DateTime>?
+  field31: Map<String, String>
+  field32: Duration?
+  field33: int
+  field34: bool
+  field35: double?
+  field36: DateTime
+  field37: String?
+  field38: List<Duration>
+  field39: Map<String, double>?
+  field40: Duration
+  field41: int
+  field42: bool?
+  field43: double
+  field44: DateTime?
+  field45: String
+  field46: List<String>?
+  field47: Map<String, Duration>
+  field48: Duration?
+  field49: int
+  field50: bool
+  field51: double?
+  field52: DateTime
+  field53: String?
+  field54: List<bool>
+  field55: Map<String, int>?
+  field56: Duration
+  field57: int?
+  field58: bool
+  field59: double
+  field60: DateTime?
+  field61: String
+  field62: List<String>?
+  field63: Map<String, String>
+  field64: Duration?
+  field65: int
+  field66: bool?
+  field67: double
+  field68: DateTime
+  field69: String?
+  field70: List<Duration>
+  field71: Map<String, double>?
+  field72: Duration
+  field73: int
+  field74: bool
+  field75: double?
+  field76: DateTime
+  field77: String?
+  field78: List<int>
+  field79: Map<String, Duration>?
+  field80: Duration
+  field81: int?
+  field82: bool
+  field83: double
+  field84: DateTime?
+  field85: String
+  field86: List<String>?
+  field87: Map<String, String>
+  field88: Duration?
+  field89: int
+  field90: bool
+  field91: double?
+  field92: DateTime
+  field93: String?
+  field94: List<bool>
+  field95: Map<String, int>?
+  field96: Duration
+  field97: int?
+  field98: bool
+  field99: double
+  field100: DateTime?
+  field101: String
+  field102: List<String>?
+  field103: Map<String, String>
+  field104: Duration?
+  field105: int
+  field106: bool?
+  field107: double
+  field108: DateTime
+  field109: String?
+  field110: List<Duration>
+  field111: Map<String, double>?
+  field112: Duration
+  field113: int
+  field114: bool
+  field115: double?
+  field116: DateTime
+  field117: String?
+  field118: List<int>
+  field119: Map<String, Duration>?
+  field120: Duration
+  field121: int?
+  field122: bool
+  field123: double
+  field124: DateTime?
+  field125: String
+  field126: List<String>?
+  field127: Map<String, String>
+  field128: Duration?
+  field129: int
+  field130: bool
+  field131: double?
+  field132: DateTime
+  field133: String?
+  field134: List<bool>
+  field135: Map<String, int>?
+  field136: Duration
+  field137: int?
+  field138: bool
+  field139: double
+  field140: DateTime?
+  field141: String
+  field142: List<String>?
+  field143: Map<String, String>
+  field144: Duration?
+  field145: int
+  field146: bool?
+  field147: double
+  field148: DateTime
+  field149: String?
+  field150: List<Duration>
+  field151: List<MassiveDataBlob>?
