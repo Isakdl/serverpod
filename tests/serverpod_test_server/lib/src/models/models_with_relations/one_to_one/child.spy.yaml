@@ -1,0 +1,4 @@
+class: Child
+table: child
+fields:
+  parent: Parent?, relation(name=parent_child)

@@ -1,0 +1,9 @@
+class: Parent
+table: parent
+fields:
+  childId: int
+  child: Child?, relation(name=parent_child, field=childId)
+indexes:
+  child_id_unique_idx:
+    fields: childId
+    unique: true
