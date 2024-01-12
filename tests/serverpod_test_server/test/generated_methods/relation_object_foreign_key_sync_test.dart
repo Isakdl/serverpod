@@ -244,7 +244,7 @@ void main() {
   });
 
   test(
-      'Given a none nullable relation when setting the object field to null the foreign key field is left as is',
+      'Given a none nullable relation when setting the object field to null the foreign key field is left as is.',
       () {
     var stockholm = Town(id: 1, name: 'Stockholm');
 
