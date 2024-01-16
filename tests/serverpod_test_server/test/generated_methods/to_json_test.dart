@@ -629,4 +629,51 @@ void main() {
       },
     });
   });
+  test(
+      'Given a double linked structure several levels deep starting from the front when serializing to json then no duplicated objects are represented',
+      () {
+    var post3 = Post(id: 3, content: 'Post 3');
+    var post2 = Post(id: 2, content: 'Post 2', next: post3);
+    var post1 = Post(id: 1, content: 'Post 1', next: post2);
+
+    var jsonMap = post1.toJson();
+
+    expect(jsonMap['next']['id'], 2);
+    expect(jsonMap['next']['previous'], isNull);
+
+    expect(jsonMap['next']['next']['id'], 3);
+    expect(jsonMap['next']['next']['previous'], isNull);
+  });
+
+  test(
+      'Given a double linked structure several levels deep starting from the back when going backwards when serializing to json then no duplicated objects are represented',
+      () {
+    var post1 = Post(id: 1, content: 'Post 1');
+    var post2 = Post(id: 2, content: 'Post 2', previous: post1);
+    var post3 = Post(id: 3, content: 'Post 3', previous: post2);
+
+    var jsonMap = post3.toJson();
+
+    expect(jsonMap['previous']['id'], 2);
+    expect(jsonMap['previous']['next'], isNull);
+
+    expect(jsonMap['previous']['previous']['id'], 1);
+    expect(jsonMap['previous']['previous']['next'], isNull);
+  });
+
+  test(
+      'Given a double linked structure several levels deep starting in the middle when serializing to json then no duplicated objects are represented',
+      () {
+    var post3 = Post(id: 3, content: 'Post 3');
+    var post2 = Post(id: 2, content: 'Post 2', next: post3);
+    Post(id: 1, content: 'Post 1', next: post2);
+
+    var jsonMap = post2.toJson();
+
+    expect(jsonMap['previous']['id'], 1);
+    expect(jsonMap['previous']['next'], isNull);
+
+    expect(jsonMap['next']['id'], 3);
+    expect(jsonMap['next']['previous'], isNull);
+  });
 }
