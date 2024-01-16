@@ -243,8 +243,6 @@ void main() {
 
       var jsonString1 = SerializationManager.encode(post1);
 
-      print(jsonString1);
-
       var fromJson1 = Post.fromJson(jsonDecode(jsonString1), protocol);
 
       test('then the id link is setup.', () {
@@ -276,8 +274,6 @@ void main() {
 
         var fromJson2 = Post.fromJson(jsonDecode(jsonString2), protocol);
 
-        print(fromJson2);
-
         expect(fromJson2.previous?.next?.next?.content, 'Post 3');
       });
 
@@ -285,8 +281,6 @@ void main() {
           'then it is possible to start at the end and traverse backwards to the start',
           () {
         var jsonString3 = SerializationManager.encode(post3.toJson());
-
-        print(jsonString3);
 
         var fromJson3 = Post.fromJson(jsonDecode(jsonString3), protocol);
 
