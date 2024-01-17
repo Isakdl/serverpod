@@ -646,7 +646,7 @@ void main() {
   });
 
   test(
-      'Given a double linked structure several levels deep starting from the back when going backwards when serializing to json then no duplicated objects are represented',
+      'Given a double linked self relation structure several levels deep starting from the back when going backwards when serializing to json then no duplicated objects are represented',
       () {
     var post1 = Post(id: 1, content: 'Post 1');
     var post2 = Post(id: 2, content: 'Post 2', previous: post1);
@@ -662,7 +662,7 @@ void main() {
   });
 
   test(
-      'Given a double linked structure several levels deep starting in the middle when serializing to json then no duplicated objects are represented',
+      'Given a double linked self relation structure several levels deep starting in the middle when serializing to json then no duplicated objects are represented',
       () {
     var post3 = Post(id: 3, content: 'Post 3');
     var post2 = Post(id: 2, content: 'Post 2', next: post3);
@@ -675,5 +675,29 @@ void main() {
 
     expect(jsonMap['next']['id'], 3);
     expect(jsonMap['next']['previous'], isNull);
+  });
+
+  test(
+      'Given a double linked relation structure one level deep from the none origin side when serializing to json then no duplicated objects are represented.',
+      () {
+    var parent = Parent(id: 1, childId: 2);
+    var child = Child(id: 3, parent: parent);
+
+    var jsonMap = child.toJson();
+
+    expect(jsonMap, contains('parent'));
+    expect(jsonMap['parent']['child'], isNull);
+  });
+
+  test(
+      'Given a double linked relation structure one level deep from the origin side when serializing to json then no duplicated objects are represented.',
+      () {
+    var child = Child(id: 2);
+    var parent = Parent(id: 1, childId: 2, child: child);
+
+    var jsonMap = parent.toJson();
+
+    expect(jsonMap, contains('child'));
+    expect(jsonMap['child']['parent'], isNull);
   });
 }

@@ -677,4 +677,28 @@ void main() {
     expect(jsonMap['next']['id'], 3);
     expect(jsonMap['next']['previous'], isNull);
   });
+
+  test(
+      'Given a double linked relation structure one level deep from the none origin side when serializing to json then no duplicated objects are represented.',
+      () {
+    var parent = Parent(id: 1, childId: 2);
+    var child = Child(id: 3, parent: parent);
+
+    var jsonMap = child.allToJson();
+
+    expect(jsonMap, contains('parent'));
+    expect(jsonMap['parent']['child'], isNull);
+  });
+
+  test(
+      'Given a double linked relation structure one level deep from the origin side when serializing to json then no duplicated objects are represented.',
+      () {
+    var child = Child(id: 2);
+    var parent = Parent(id: 1, childId: 2, child: child);
+
+    var jsonMap = parent.allToJson();
+
+    expect(jsonMap, contains('child'));
+    expect(jsonMap['child']['parent'], isNull);
+  });
 }
