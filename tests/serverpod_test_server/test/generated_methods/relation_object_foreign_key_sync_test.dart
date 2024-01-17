@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_test_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
@@ -109,7 +112,7 @@ void main() {
 
     post.nextId = 2;
 
-    expect(post.next, isNotNull);
+    expect(post.next, nextPost);
   });
 
   test(
@@ -177,7 +180,7 @@ void main() {
     );
 
     expect(company.townId, 1);
-    expect(company.town, isNotNull);
+    expect(company.town, stockholm);
   });
 
   test(
@@ -257,5 +260,85 @@ void main() {
     company.town = null;
 
     expect(company.townId, 1);
+  });
+
+  test(
+      'Given a double linked required relation without ids when setting the origin side object in the constructor then an error is thrown.',
+      () {
+    var child = Child();
+
+    expect(
+        () => Parent(childId: 2, child: child), throwsA(isA<ArgumentError>()));
+  });
+
+  test(
+      'Given a double linked required relation without ids when setting the origin side object with the copyWith method then an error is thrown.',
+      () {
+    var child = Child();
+    var parent = Parent(childId: 2);
+
+    expect(() => parent.copyWith(child: child), throwsA(isA<ArgumentError>()));
+  });
+
+  test(
+      'Given a double linked required relation without ids when setting the origin side object with the setter method then an error is thrown.',
+      () {
+    var child = Child();
+    var parent = Parent(childId: 2);
+
+    expect(() => parent.child = child, throwsA(isA<ArgumentError>()));
+  });
+
+  test(
+      'Given a double linked required relation with mismatching ids when setting the origin side object with the copyWith method then an error is thrown.',
+      () {
+    var child = Child(id: 3);
+    var parent = Parent(childId: 2);
+
+    expect(() => parent.copyWith(childId: 2, child: child),
+        throwsA(isA<ArgumentError>()));
+  });
+
+  test(
+      'Given a double linked relation with ids when setting the origin side in the constructor then the object field is set on the origin side.',
+      () {
+    var child = Child(id: 2);
+    var parent = Parent(id: 1, childId: 2, child: child);
+
+    expect(parent.child?.parent, parent);
+  });
+
+  test(
+      'Given a double linked relation with ids when setting the origin side in the setter method then the object field is set on the origin side.',
+      () {
+    var child = Child(id: 2);
+    var parent = Parent(id: 1, childId: 2, child: child);
+
+    parent.child = child;
+
+    expect(parent.child?.parent, parent);
+  });
+
+  test(
+      'Given a double linked relation with ids when setting the origin side in the copyWith method then the object field is set on the origin side.',
+      () {
+    var child = Child(id: 2);
+    var parent = Parent(id: 1, childId: 3);
+
+    var copy = parent.copyWith(child: child);
+
+    expect(copy.child?.parent?.id, 1);
+  });
+
+  test('Given a double linked relation with ids when setting the origin side in the fromJson constructor then the object field is set on the origin side.', () {
+    var child = Child(id: 2);
+    var parent = Parent(id: 1, childId: 2, child: child);
+
+    var protocol = Protocol();
+    var jsonString = SerializationManager.encode(parent.toJson());
+
+    var fromJson = Parent.fromJson(jsonDecode(jsonString), protocol);
+
+    expect(fromJson.child?.parent, fromJson);
   });
 }
