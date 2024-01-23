@@ -166,7 +166,7 @@ class TypeDefinition {
         } else if (url == defaultModuleAlias) {
           // protocol: reference
           t.url = p.posix
-              .joinAll([...subDirParts.map((e) => '..'), 'protocol.dart']);
+              .joinAll([/*...subDirParts.map((e) => '..'),*/ 'models.dart']);
         } else if (!serverCode &&
             (url?.startsWith('package:${config.serverPackage}') ?? false)) {
           // import from the server package

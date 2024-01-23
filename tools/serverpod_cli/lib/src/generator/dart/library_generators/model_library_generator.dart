@@ -7,6 +7,7 @@ import 'package:serverpod_cli/src/generator/dart/library_generators/util/class_g
 import 'package:serverpod_cli/src/generator/shared.dart';
 import 'package:serverpod_serialization/serverpod_serialization.dart';
 import 'package:serverpod_service_client/serverpod_service_client.dart';
+import 'package:path/path.dart' as path;
 
 /// Generates the dart libraries for [SerializableModelDefinition]s.
 class SerializableModelLibraryGenerator {
@@ -41,6 +42,9 @@ class SerializableModelLibraryGenerator {
 
     return Library(
       (libraryBuilder) {
+        var modelsPath = path.joinAll(
+            [...classDefinition.subDirParts.map((e) => '..'), 'models.dart']);
+        libraryBuilder.directives.add(Directive.partOf(modelsPath));
         libraryBuilder.body.addAll([
           _buildModelClass(
             className,
@@ -51,7 +55,7 @@ class SerializableModelLibraryGenerator {
           // We need to generate the implementation class for the copyWith method
           // to support differentiating between null and undefined values.
           // https://stackoverflow.com/questions/68009392/dart-custom-copywith-method-with-nullable-properties
-          if (_shouldCreateUndefinedClass(fields)) _buildUndefinedClass(),
+          //if (_shouldCreateUndefinedClass(fields)) _buildUndefinedClass(),
           _buildModelImplClass(
             className,
             classDefinition,
@@ -2094,6 +2098,9 @@ class SerializableModelLibraryGenerator {
   /// Handle enums for [generateModelLibrary]
   Library _generateEnumLibrary(EnumDefinition enumDefinition) {
     var library = Library((library) {
+      var modelsPath = path.joinAll(
+          [...enumDefinition.subDirParts.map((e) => '..'), 'models.dart']);
+      library.directives.add(Directive.partOf(modelsPath));
       library.body.add(
         Enum((e) {
           e.name = enumDefinition.className;
