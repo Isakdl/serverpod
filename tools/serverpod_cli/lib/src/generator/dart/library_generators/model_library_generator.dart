@@ -3,6 +3,7 @@ import 'package:recase/recase.dart';
 import 'package:serverpod_cli/analyzer.dart';
 import 'package:serverpod_cli/src/analyzer/models/definitions.dart';
 import 'package:serverpod_cli/src/generator/dart/library_generators/class_generators/repository_classes.dart';
+import 'package:serverpod_cli/src/generator/dart/library_generators/metod_generators/to_json_methods.dart';
 import 'package:serverpod_cli/src/generator/dart/library_generators/util/class_generators_util.dart';
 import 'package:serverpod_cli/src/generator/shared.dart';
 import 'package:serverpod_serialization/serverpod_serialization.dart';
@@ -186,42 +187,35 @@ class SerializableModelLibraryGenerator {
         fields,
       ));
 
-      // Serialization
-      classBuilder.methods.add(_buildModelClassToJsonMethod(fields));
+      classBuilder.methods.addAll(buildToJsonMethods(
+        fields,
+        serverCode,
+        tableName,
+      ));
 
-      // Serialization for database and everything
-      if (serverCode) {
-        if (tableName != null) {
-          classBuilder.methods
-              .add(_buildModelClassToJsonForDatabaseMethod(fields));
-        }
-
-        classBuilder.methods.add(_buildModelClassAllToJsonMethod(fields));
-
-        if (tableName != null) {
-          classBuilder.methods.addAll([
-            _buildModelClassSetColumnMethod(fields),
-            _buildModelClassFindMethod(className, relationFields),
-            _buildModelClassFindSingleRowMethod(
-              className,
-              relationFields,
-            ),
-            _buildModelClassFindByIdMethod(className, relationFields),
-            _buildModelClassDeleteMethod(className),
-            _buildModelClassDeleteRowMethod(className),
-            _buildModelClassUpdateMethod(className),
-            _buildModelClassInsertMethod(className),
-            _buildModelClassCountMethod(className),
-            _buildModelClassIncludeMethod(
-              className,
-              relationFields,
-              classDefinition.subDirParts,
-            ),
-            _buildModelClassIncludeListMethod(
-              className,
-            ),
-          ]);
-        }
+      if (serverCode && tableName != null) {
+        classBuilder.methods.addAll([
+          _buildModelClassSetColumnMethod(fields),
+          _buildModelClassFindMethod(className, relationFields),
+          _buildModelClassFindSingleRowMethod(
+            className,
+            relationFields,
+          ),
+          _buildModelClassFindByIdMethod(className, relationFields),
+          _buildModelClassDeleteMethod(className),
+          _buildModelClassDeleteRowMethod(className),
+          _buildModelClassUpdateMethod(className),
+          _buildModelClassInsertMethod(className),
+          _buildModelClassCountMethod(className),
+          _buildModelClassIncludeMethod(
+            className,
+            relationFields,
+            classDefinition.subDirParts,
+          ),
+          _buildModelClassIncludeListMethod(
+            className,
+          ),
+        ]);
       }
     });
   }
@@ -1147,7 +1141,7 @@ class SerializableModelLibraryGenerator {
         for (var field in serializableFields)
           Block.of([
             Code('case \'${field.name}\':'),
-            _createSerializableFieldNameReference(serverCode, field)
+            createSerializableFieldNameReference(serverCode, field)
                 .assign(refer('value'))
                 .statement,
             refer('').returned.statement,
@@ -1156,163 +1150,6 @@ class SerializableModelLibraryGenerator {
         refer('UnimplementedError').call([]).thrown.statement,
         const Code('}'),
       ]));
-  }
-
-  Method _buildModelClassAllToJsonMethod(
-      List<SerializableModelFieldDefinition> fields) {
-    return Method(
-      (m) {
-        m.returns = refer('Map<String,dynamic>');
-        m.name = 'allToJson';
-        m.annotations.add(refer('override'));
-
-        m.body = _createToJsonBodyFromFields(fields, 'allToJson');
-      },
-    );
-  }
-
-  Method _buildModelClassToJsonForDatabaseMethod(
-      List<SerializableModelFieldDefinition> fields) {
-    var serializableFields =
-        fields.where((f) => f.shouldSerializeFieldForDatabase(serverCode));
-
-    return Method(
-      (m) {
-        m.returns = refer('Map<String,dynamic>');
-        m.name = 'toJsonForDatabase';
-        m.annotations.addAll([
-          refer('override'),
-          refer("Deprecated('Will be removed in 2.0.0')")
-        ]);
-
-        m.body = literalMap(
-          {
-            for (var field in serializableFields)
-              literalString(field.name):
-                  _createSerializableFieldNameReference(serverCode, field)
-          },
-        ).returned.statement;
-      },
-    );
-  }
-
-  Method _buildModelClassToJsonMethod(
-    List<SerializableModelFieldDefinition> fields,
-  ) {
-    return Method(
-      (m) {
-        m.returns = refer('Map<String,dynamic>');
-        m.name = 'toJson';
-        m.annotations.add(refer('override'));
-
-        var filteredFields =
-            fields.where((field) => field.shouldSerializeField(serverCode));
-        m.body = _createToJsonBodyFromFields(filteredFields, 'toJson');
-      },
-    );
-  }
-
-  Expression _toJsonCallConversionMethod(
-    Reference fieldRef,
-    TypeDefinition fieldType,
-    String toJsonMethodName,
-  ) {
-    if (fieldType.isSerializedValue) return fieldRef;
-
-    Expression fieldExpression = fieldRef;
-
-    var toJson = fieldType.isSerializedByExtension || fieldType.isEnumType
-        ? 'toJson'
-        : toJsonMethodName;
-
-    if (fieldType.nullable) {
-      fieldExpression = fieldExpression.nullSafeProperty(toJson);
-    } else {
-      fieldExpression = fieldExpression.property(toJson);
-    }
-
-    Map<String, Expression> namedParams = {};
-
-    if (fieldType.isListType && !fieldType.generics.first.isSerializedValue) {
-      namedParams = {
-        'valueToJson': Method(
-          (p) => p
-            ..lambda = true
-            ..requiredParameters.add(
-              Parameter((p) => p..name = 'v'),
-            )
-            ..body = _toJsonCallConversionMethod(
-              refer('v'),
-              fieldType.generics.first,
-              toJsonMethodName,
-            ).code,
-        ).closure
-      };
-    } else if (fieldType.isMapType) {
-      if (!fieldType.generics.first.isSerializedValue) {
-        namedParams = {
-          ...namedParams,
-          'keyToJson': Method(
-            (p) => p
-              ..lambda = true
-              ..requiredParameters.add(
-                Parameter((p) => p..name = 'k'),
-              )
-              ..body = _toJsonCallConversionMethod(
-                refer('k'),
-                fieldType.generics.first,
-                toJsonMethodName,
-              ).code,
-          ).closure
-        };
-      }
-      if (!fieldType.generics.last.isSerializedValue) {
-        namedParams = {
-          ...namedParams,
-          'valueToJson': Method(
-            (p) => p
-              ..lambda = true
-              ..requiredParameters.add(
-                Parameter((p) => p..name = 'v'),
-              )
-              ..body = _toJsonCallConversionMethod(
-                refer('v'),
-                fieldType.generics.last,
-                toJsonMethodName,
-              ).code,
-          ).closure
-        };
-      }
-    }
-
-    return fieldExpression.call([], namedParams);
-  }
-
-  Code _createToJsonBodyFromFields(
-    Iterable<SerializableModelFieldDefinition> fields,
-    String toJsonMethodName,
-  ) {
-    var map = fields.fold<Map<Code, Expression>>({}, (map, field) {
-      var fieldName = _createSerializableFieldNameReference(
-        serverCode,
-        field,
-      );
-
-      Expression fieldRef = _toJsonCallConversionMethod(
-        fieldName,
-        field.type,
-        toJsonMethodName,
-      );
-
-      return {
-        ...map,
-        if (field.type.nullable)
-          Code("if (${fieldName.symbol} != null) '${field.name}'"): fieldRef,
-        if (!field.type.nullable) Code("'${field.name}'"): fieldRef,
-      };
-    });
-
-    return literalMap(map).returned.statement;
   }
 
   Constructor _buildModelClassFromJsonConstructor(
@@ -1485,7 +1322,7 @@ class SerializableModelLibraryGenerator {
             .reference(serverCode, subDirParts: subDirParts, config: config);
         f
           ..name =
-              _createSerializableFieldNameReference(serverCode, field).symbol
+              createSerializableFieldNameReference(serverCode, field).symbol
           ..docs.addAll(field.documentation ?? []);
       }));
     }
@@ -2306,17 +2143,5 @@ class SerializableModelLibraryGenerator {
     ]);
 
     return library.build();
-  }
-
-  Reference _createSerializableFieldNameReference(
-    bool serverCode,
-    SerializableModelFieldDefinition field,
-  ) {
-    if (field.hiddenSerializableField(serverCode) &&
-        !field.name.startsWith('_')) {
-      return refer('_${field.name}');
-    }
-
-    return refer(field.name);
   }
 }

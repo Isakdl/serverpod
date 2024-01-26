@@ -13,6 +13,18 @@ String createFieldName(
   return field.name;
 }
 
+Reference createSerializableFieldNameReference(
+  bool serverCode,
+  SerializableModelFieldDefinition field,
+) {
+  if (field.hiddenSerializableField(serverCode) &&
+      !field.name.startsWith('_')) {
+    return refer('_${field.name}');
+  }
+
+  return refer(field.name);
+}
+
 String createForeignFieldName(ListRelationDefinition relation) {
   if (relation.implicitForeignField) {
     return createImplicitFieldName(relation.foreignFieldName);
