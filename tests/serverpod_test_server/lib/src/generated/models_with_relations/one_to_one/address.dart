@@ -8,8 +8,7 @@
 // ignore_for_file: type_literal_in_constant_pattern
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../../protocol.dart' as _i2;
+part of protocol;
 
 abstract class Address extends _i1.TableRow {
   Address._({
@@ -23,7 +22,7 @@ abstract class Address extends _i1.TableRow {
     int? id,
     required String street,
     int? inhabitantId,
-    _i2.Citizen? inhabitant,
+    Citizen? inhabitant,
   }) = _AddressImpl;
 
   factory Address.fromJson(
@@ -37,7 +36,7 @@ abstract class Address extends _i1.TableRow {
       inhabitantId: serializationManager
           .deserialize<int?>(jsonSerialization['inhabitantId']),
       inhabitant: serializationManager
-          .deserialize<_i2.Citizen?>(jsonSerialization['inhabitant']),
+          .deserialize<Citizen?>(jsonSerialization['inhabitant']),
     );
   }
 
@@ -49,7 +48,7 @@ abstract class Address extends _i1.TableRow {
 
   int? inhabitantId;
 
-  _i2.Citizen? inhabitant;
+  Citizen? inhabitant;
 
   @override
   _i1.Table get table => t;
@@ -58,7 +57,7 @@ abstract class Address extends _i1.TableRow {
     int? id,
     String? street,
     int? inhabitantId,
-    _i2.Citizen? inhabitant,
+    Citizen? inhabitant,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -235,7 +234,7 @@ abstract class Address extends _i1.TableRow {
     );
   }
 
-  static AddressInclude include({_i2.CitizenInclude? inhabitant}) {
+  static AddressInclude include({CitizenInclude? inhabitant}) {
     return AddressInclude._(inhabitant: inhabitant);
   }
 
@@ -260,14 +259,12 @@ abstract class Address extends _i1.TableRow {
   }
 }
 
-class _Undefined {}
-
 class _AddressImpl extends Address {
   _AddressImpl({
     int? id,
     required String street,
     int? inhabitantId,
-    _i2.Citizen? inhabitant,
+    Citizen? inhabitant,
   }) : super._(
           id: id,
           street: street,
@@ -287,7 +284,7 @@ class _AddressImpl extends Address {
       street: street ?? this.street,
       inhabitantId: inhabitantId is int? ? inhabitantId : this.inhabitantId,
       inhabitant:
-          inhabitant is _i2.Citizen? ? inhabitant : this.inhabitant?.copyWith(),
+          inhabitant is Citizen? ? inhabitant : this.inhabitant?.copyWith(),
     );
   }
 }
@@ -308,17 +305,17 @@ class AddressTable extends _i1.Table {
 
   late final _i1.ColumnInt inhabitantId;
 
-  _i2.CitizenTable? _inhabitant;
+  CitizenTable? _inhabitant;
 
-  _i2.CitizenTable get inhabitant {
+  CitizenTable get inhabitant {
     if (_inhabitant != null) return _inhabitant!;
     _inhabitant = _i1.createRelationTable(
       relationFieldName: 'inhabitant',
       field: Address.t.inhabitantId,
-      foreignField: _i2.Citizen.t.id,
+      foreignField: Citizen.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.CitizenTable(tableRelation: foreignTableRelation),
+          CitizenTable(tableRelation: foreignTableRelation),
     );
     return _inhabitant!;
   }
@@ -343,11 +340,11 @@ class AddressTable extends _i1.Table {
 AddressTable tAddress = AddressTable();
 
 class AddressInclude extends _i1.IncludeObject {
-  AddressInclude._({_i2.CitizenInclude? inhabitant}) {
+  AddressInclude._({CitizenInclude? inhabitant}) {
     _inhabitant = inhabitant;
   }
 
-  _i2.CitizenInclude? _inhabitant;
+  CitizenInclude? _inhabitant;
 
   @override
   Map<String, _i1.Include?> get includes => {'inhabitant': _inhabitant};
@@ -541,7 +538,7 @@ class AddressAttachRowRepository {
   Future<void> inhabitant(
     _i1.Session session,
     Address address,
-    _i2.Citizen inhabitant,
+    Citizen inhabitant,
   ) async {
     if (address.id == null) {
       throw ArgumentError.notNull('address.id');

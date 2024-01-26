@@ -8,8 +8,7 @@
 // ignore_for_file: type_literal_in_constant_pattern
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../../protocol.dart' as _i2;
+part of protocol;
 
 abstract class Town extends _i1.TableRow {
   Town._({
@@ -23,7 +22,7 @@ abstract class Town extends _i1.TableRow {
     int? id,
     required String name,
     int? mayorId,
-    _i2.Citizen? mayor,
+    Citizen? mayor,
   }) = _TownImpl;
 
   factory Town.fromJson(
@@ -36,7 +35,7 @@ abstract class Town extends _i1.TableRow {
       mayorId:
           serializationManager.deserialize<int?>(jsonSerialization['mayorId']),
       mayor: serializationManager
-          .deserialize<_i2.Citizen?>(jsonSerialization['mayor']),
+          .deserialize<Citizen?>(jsonSerialization['mayor']),
     );
   }
 
@@ -48,7 +47,7 @@ abstract class Town extends _i1.TableRow {
 
   int? mayorId;
 
-  _i2.Citizen? mayor;
+  Citizen? mayor;
 
   @override
   _i1.Table get table => t;
@@ -57,15 +56,27 @@ abstract class Town extends _i1.TableRow {
     int? id,
     String? name,
     int? mayorId,
-    _i2.Citizen? mayor,
+    Citizen? mayor,
   });
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({Set<Object>? $visited, Object? $previous}) {
+    var _visited = $visited ?? {};
+
+    if (_visited.contains(this)) {
+      throw StateError(
+        'Unable to convert object to a JSON representation because a circular reference was detected.',
+      );
+    }
+    _visited.add(this);
+
+    var _previousNode = $previous ?? this;
+    var _mayor = mayor;
     return {
       if (id != null) 'id': id,
       'name': name,
       if (mayorId != null) 'mayorId': mayorId,
-      if (mayor != null) 'mayor': mayor?.toJson(),
+      if (_mayor is _CitizenImpl && _previousNode != _mayor)
+        'mayor': _mayor.toJson($visited: _visited, $previous: this),
     };
   }
 
@@ -234,7 +245,7 @@ abstract class Town extends _i1.TableRow {
     );
   }
 
-  static TownInclude include({_i2.CitizenInclude? mayor}) {
+  static TownInclude include({CitizenInclude? mayor}) {
     return TownInclude._(mayor: mayor);
   }
 
@@ -259,14 +270,12 @@ abstract class Town extends _i1.TableRow {
   }
 }
 
-class _Undefined {}
-
 class _TownImpl extends Town {
   _TownImpl({
     int? id,
     required String name,
     int? mayorId,
-    _i2.Citizen? mayor,
+    Citizen? mayor,
   }) : super._(
           id: id,
           name: name,
@@ -285,7 +294,7 @@ class _TownImpl extends Town {
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       mayorId: mayorId is int? ? mayorId : this.mayorId,
-      mayor: mayor is _i2.Citizen? ? mayor : this.mayor?.copyWith(),
+      mayor: mayor is Citizen? ? mayor : this.mayor?.copyWith(),
     );
   }
 }
@@ -306,17 +315,17 @@ class TownTable extends _i1.Table {
 
   late final _i1.ColumnInt mayorId;
 
-  _i2.CitizenTable? _mayor;
+  CitizenTable? _mayor;
 
-  _i2.CitizenTable get mayor {
+  CitizenTable get mayor {
     if (_mayor != null) return _mayor!;
     _mayor = _i1.createRelationTable(
       relationFieldName: 'mayor',
       field: Town.t.mayorId,
-      foreignField: _i2.Citizen.t.id,
+      foreignField: Citizen.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.CitizenTable(tableRelation: foreignTableRelation),
+          CitizenTable(tableRelation: foreignTableRelation),
     );
     return _mayor!;
   }
@@ -341,11 +350,11 @@ class TownTable extends _i1.Table {
 TownTable tTown = TownTable();
 
 class TownInclude extends _i1.IncludeObject {
-  TownInclude._({_i2.CitizenInclude? mayor}) {
+  TownInclude._({CitizenInclude? mayor}) {
     _mayor = mayor;
   }
 
-  _i2.CitizenInclude? _mayor;
+  CitizenInclude? _mayor;
 
   @override
   Map<String, _i1.Include?> get includes => {'mayor': _mayor};
@@ -539,7 +548,7 @@ class TownAttachRowRepository {
   Future<void> mayor(
     _i1.Session session,
     Town town,
-    _i2.Citizen mayor,
+    Citizen mayor,
   ) async {
     if (town.id == null) {
       throw ArgumentError.notNull('town.id');

@@ -8,18 +8,27 @@
 // ignore_for_file: type_literal_in_constant_pattern
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../../protocol.dart' as _i2;
+part of protocol;
 
 abstract class Child extends _i1.TableRow {
   Child._({
     int? id,
-    this.parent,
-  }) : super(id);
+    Parent? parent,
+  })  : _parent = parent,
+        super(id) {
+    if (parent != null && id == null) {
+      throw ArgumentError.notNull('id');
+    }
+
+    if (parent != null && id != null) {
+      parent.childId = id;
+      parent.child = this;
+    }
+  }
 
   factory Child({
     int? id,
-    _i2.Parent? parent,
+    Parent? parent,
   }) = _ChildImpl;
 
   factory Child.fromJson(
@@ -29,7 +38,7 @@ abstract class Child extends _i1.TableRow {
     return Child(
       id: serializationManager.deserialize<int?>(jsonSerialization['id']),
       parent: serializationManager
-          .deserialize<_i2.Parent?>(jsonSerialization['parent']),
+          .deserialize<Parent?>(jsonSerialization['parent']),
     );
   }
 
@@ -37,14 +46,30 @@ abstract class Child extends _i1.TableRow {
 
   static const db = ChildRepository._();
 
-  _i2.Parent? parent;
+  Parent? _parent;
+
+  set parent(Parent? parent) {
+    if (parent != null && id == null) {
+      throw ArgumentError.notNull('id');
+    }
+
+    _parent = parent;
+
+    var _id = id;
+    if (_id != null) {
+      _parent?.childId = _id;
+      _parent?.child = this;
+    }
+  }
+
+  Parent? get parent => _parent;
 
   @override
   _i1.Table get table => t;
 
   Child copyWith({
     int? id,
-    _i2.Parent? parent,
+    Parent? parent,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -53,8 +78,6 @@ abstract class Child extends _i1.TableRow {
       if (parent != null) 'parent': parent?.toJson(),
     };
   }
-
-  @override
   @Deprecated('Will be removed in 2.0.0')
   Map<String, dynamic> toJsonForDatabase() {
     return {'id': id};
@@ -207,7 +230,7 @@ abstract class Child extends _i1.TableRow {
     );
   }
 
-  static ChildInclude include({_i2.ParentInclude? parent}) {
+  static ChildInclude include({ParentInclude? parent}) {
     return ChildInclude._(parent: parent);
   }
 
@@ -237,7 +260,7 @@ class _Undefined {}
 class _ChildImpl extends Child {
   _ChildImpl({
     int? id,
-    _i2.Parent? parent,
+    Parent? parent,
   }) : super._(
           id: id,
           parent: parent,
@@ -250,25 +273,48 @@ class _ChildImpl extends Child {
   }) {
     return Child(
       id: id is int? ? id : this.id,
-      parent: parent is _i2.Parent? ? parent : this.parent?.copyWith(),
+      parent: parent is Parent? ? parent : this.parent?.copyWith(),
     );
+  }
+
+  Map<String, dynamic> toJson({Set<Object>? $visited, Object? $previous}) {
+    var _visited = $visited ?? Set<Object>();
+    _visited.add(this);
+
+    var $$parent = parent;
+
+    return {
+      if (id != null) 'id': id,
+      if ($$parent is _ParentImpl && $previous != $$parent)
+        'parent': $$parent.toJson($visited: _visited, $previous: this),
+    };
+  }
+
+  @override
+  Map<String, dynamic> allToJson({_ParentImpl? $parent}) {
+    var __parent = parent;
+    return {
+      if (id != null) 'id': id,
+      if (__parent is _ParentImpl && $parent != __parent)
+        'parent': __parent.toJson($previous: this),
+    };
   }
 }
 
 class ChildTable extends _i1.Table {
   ChildTable({super.tableRelation}) : super(tableName: 'child') {}
 
-  _i2.ParentTable? _parent;
+  ParentTable? _parent;
 
-  _i2.ParentTable get parent {
+  ParentTable get parent {
     if (_parent != null) return _parent!;
     _parent = _i1.createRelationTable(
       relationFieldName: 'parent',
       field: Child.t.id,
-      foreignField: _i2.Parent.t.childId,
+      foreignField: Parent.t.childId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.ParentTable(tableRelation: foreignTableRelation),
+          ParentTable(tableRelation: foreignTableRelation),
     );
     return _parent!;
   }
@@ -289,11 +335,11 @@ class ChildTable extends _i1.Table {
 ChildTable tChild = ChildTable();
 
 class ChildInclude extends _i1.IncludeObject {
-  ChildInclude._({_i2.ParentInclude? parent}) {
+  ChildInclude._({ParentInclude? parent}) {
     _parent = parent;
   }
 
-  _i2.ParentInclude? _parent;
+  ParentInclude? _parent;
 
   @override
   Map<String, _i1.Include?> get includes => {'parent': _parent};
@@ -487,7 +533,7 @@ class ChildAttachRowRepository {
   Future<void> parent(
     _i1.Session session,
     Child child,
-    _i2.Parent parent,
+    Parent parent,
   ) async {
     if (parent.id == null) {
       throw ArgumentError.notNull('parent.id');
@@ -497,9 +543,9 @@ class ChildAttachRowRepository {
     }
 
     var $parent = parent.copyWith(childId: child.id);
-    await session.dbNext.updateRow<_i2.Parent>(
+    await session.dbNext.updateRow<Parent>(
       $parent,
-      columns: [_i2.Parent.t.childId],
+      columns: [Parent.t.childId],
     );
   }
 }
@@ -524,9 +570,9 @@ class ChildDetachRowRepository {
     }
 
     var $$parent = $parent.copyWith(childId: null);
-    await session.dbNext.updateRow<_i2.Parent>(
+    await session.dbNext.updateRow<Parent>(
       $$parent,
-      columns: [_i2.Parent.t.childId],
+      columns: [Parent.t.childId],
     );
   }
 }

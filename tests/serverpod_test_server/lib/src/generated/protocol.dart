@@ -44,12 +44,6 @@ import 'models_with_relations/nested_one_to_many/team.dart' as _i26;
 import 'models_with_relations/one_to_many/comment.dart' as _i27;
 import 'models_with_relations/one_to_many/customer.dart' as _i28;
 import 'models_with_relations/one_to_many/order.dart' as _i29;
-import 'models_with_relations/one_to_one/address.dart' as _i30;
-import 'models_with_relations/one_to_one/child.dart' as _i31;
-import 'models_with_relations/one_to_one/citizen.dart' as _i32;
-import 'models_with_relations/one_to_one/company.dart' as _i33;
-import 'models_with_relations/one_to_one/parent.dart' as _i34;
-import 'models_with_relations/one_to_one/town.dart' as _i35;
 import 'models_with_relations/self_relation/many_to_many/blocking.dart' as _i36;
 import 'models_with_relations/self_relation/many_to_many/member.dart' as _i37;
 import 'models_with_relations/self_relation/one_to_many/cat.dart' as _i38;
@@ -95,14 +89,8 @@ import 'package:serverpod_test_server/src/generated/simple_data.dart' as _i77;
 import 'package:serverpod_test_server/src/generated/unique_data.dart' as _i78;
 import 'package:serverpod_test_server/src/generated/models_with_list_relations/person.dart'
     as _i79;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/citizen.dart'
-    as _i80;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/address.dart'
-    as _i81;
 import 'package:serverpod_test_server/src/generated/models_with_relations/self_relation/one_to_one/post.dart'
     as _i82;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/company.dart'
-    as _i83;
 import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_many/customer.dart'
     as _i84;
 import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_many/comment.dart'
@@ -136,12 +124,6 @@ export 'models_with_relations/nested_one_to_many/team.dart';
 export 'models_with_relations/one_to_many/comment.dart';
 export 'models_with_relations/one_to_many/customer.dart';
 export 'models_with_relations/one_to_many/order.dart';
-export 'models_with_relations/one_to_one/address.dart';
-export 'models_with_relations/one_to_one/child.dart';
-export 'models_with_relations/one_to_one/citizen.dart';
-export 'models_with_relations/one_to_one/company.dart';
-export 'models_with_relations/one_to_one/parent.dart';
-export 'models_with_relations/one_to_one/town.dart';
 export 'models_with_relations/self_relation/many_to_many/blocking.dart';
 export 'models_with_relations/self_relation/many_to_many/member.dart';
 export 'models_with_relations/self_relation/one_to_many/cat.dart';
@@ -178,6 +160,13 @@ export 'types.dart';
 export 'types_list.dart';
 export 'types_map.dart';
 export 'unique_data.dart';
+
+part 'models_with_relations/one_to_one/address.dart';
+part 'models_with_relations/one_to_one/citizen.dart';
+part 'models_with_relations/one_to_one/company.dart';
+part 'models_with_relations/one_to_one/town.dart';
+part 'models_with_relations/one_to_one/parent.dart';
+part 'models_with_relations/one_to_one/child.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -2810,23 +2799,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i29.Order) {
       return _i29.Order.fromJson(data, this) as T;
     }
-    if (t == _i30.Address) {
-      return _i30.Address.fromJson(data, this) as T;
+    if (t == Address) {
+      return Address.fromJson(data, this) as T;
     }
-    if (t == _i31.Child) {
-      return _i31.Child.fromJson(data, this) as T;
+    if (t == Child) {
+      return Child.fromJson(data, this) as T;
     }
-    if (t == _i32.Citizen) {
-      return _i32.Citizen.fromJson(data, this) as T;
+    if (t == Citizen) {
+      return Citizen.fromJson(data, this) as T;
     }
-    if (t == _i33.Company) {
-      return _i33.Company.fromJson(data, this) as T;
+    if (t == Company) {
+      return Company.fromJson(data, this) as T;
     }
-    if (t == _i34.Parent) {
-      return _i34.Parent.fromJson(data, this) as T;
+    if (t == Parent) {
+      return Parent.fromJson(data, this) as T;
     }
-    if (t == _i35.Town) {
-      return _i35.Town.fromJson(data, this) as T;
+    if (t == Town) {
+      return Town.fromJson(data, this) as T;
     }
     if (t == _i36.Blocking) {
       return _i36.Blocking.fromJson(data, this) as T;
@@ -3029,23 +3018,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i29.Order?>()) {
       return (data != null ? _i29.Order.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i30.Address?>()) {
-      return (data != null ? _i30.Address.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<Address?>()) {
+      return (data != null ? Address.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i31.Child?>()) {
-      return (data != null ? _i31.Child.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<Child?>()) {
+      return (data != null ? Child.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i32.Citizen?>()) {
-      return (data != null ? _i32.Citizen.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<Citizen?>()) {
+      return (data != null ? Citizen.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i33.Company?>()) {
-      return (data != null ? _i33.Company.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<Company?>()) {
+      return (data != null ? Company.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i34.Parent?>()) {
-      return (data != null ? _i34.Parent.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<Parent?>()) {
+      return (data != null ? Parent.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i35.Town?>()) {
-      return (data != null ? _i35.Town.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<Town?>()) {
+      return (data != null ? Town.fromJson(data, this) : null) as T;
     }
     if (t == _i1.getType<_i36.Blocking?>()) {
       return (data != null ? _i36.Blocking.fromJson(data, this) : null) as T;
@@ -3784,20 +3773,20 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List).map((e) => deserialize<_i79.Person>(e)).toList()
           as dynamic;
     }
-    if (t == List<_i80.Citizen>) {
-      return (data as List).map((e) => deserialize<_i80.Citizen>(e)).toList()
+    if (t == List<Citizen>) {
+      return (data as List).map((e) => deserialize<Citizen>(e)).toList()
           as dynamic;
     }
-    if (t == List<_i81.Address>) {
-      return (data as List).map((e) => deserialize<_i81.Address>(e)).toList()
+    if (t == List<Address>) {
+      return (data as List).map((e) => deserialize<Address>(e)).toList()
           as dynamic;
     }
     if (t == List<_i82.Post>) {
       return (data as List).map((e) => deserialize<_i82.Post>(e)).toList()
           as dynamic;
     }
-    if (t == List<_i83.Company>) {
-      return (data as List).map((e) => deserialize<_i83.Company>(e)).toList()
+    if (t == List<Company>) {
+      return (data as List).map((e) => deserialize<Company>(e)).toList()
           as dynamic;
     }
     if (t == List<List<int>>) {
@@ -4188,22 +4177,22 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i29.Order) {
       return 'Order';
     }
-    if (data is _i30.Address) {
+    if (data is Address) {
       return 'Address';
     }
-    if (data is _i31.Child) {
+    if (data is Child) {
       return 'Child';
     }
-    if (data is _i32.Citizen) {
+    if (data is Citizen) {
       return 'Citizen';
     }
-    if (data is _i33.Company) {
+    if (data is Company) {
       return 'Company';
     }
-    if (data is _i34.Parent) {
+    if (data is Parent) {
       return 'Parent';
     }
-    if (data is _i35.Town) {
+    if (data is Town) {
       return 'Town';
     }
     if (data is _i36.Blocking) {
@@ -4412,22 +4401,22 @@ class Protocol extends _i1.SerializationManagerServer {
       return deserialize<_i29.Order>(data['data']);
     }
     if (data['className'] == 'Address') {
-      return deserialize<_i30.Address>(data['data']);
+      return deserialize<Address>(data['data']);
     }
     if (data['className'] == 'Child') {
-      return deserialize<_i31.Child>(data['data']);
+      return deserialize<Child>(data['data']);
     }
     if (data['className'] == 'Citizen') {
-      return deserialize<_i32.Citizen>(data['data']);
+      return deserialize<Citizen>(data['data']);
     }
     if (data['className'] == 'Company') {
-      return deserialize<_i33.Company>(data['data']);
+      return deserialize<Company>(data['data']);
     }
     if (data['className'] == 'Parent') {
-      return deserialize<_i34.Parent>(data['data']);
+      return deserialize<Parent>(data['data']);
     }
     if (data['className'] == 'Town') {
-      return deserialize<_i35.Town>(data['data']);
+      return deserialize<Town>(data['data']);
     }
     if (data['className'] == 'Blocking') {
       return deserialize<_i36.Blocking>(data['data']);
@@ -4607,18 +4596,18 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i28.Customer.t;
       case _i29.Order:
         return _i29.Order.t;
-      case _i30.Address:
-        return _i30.Address.t;
-      case _i31.Child:
-        return _i31.Child.t;
-      case _i32.Citizen:
-        return _i32.Citizen.t;
-      case _i33.Company:
-        return _i33.Company.t;
-      case _i34.Parent:
-        return _i34.Parent.t;
-      case _i35.Town:
-        return _i35.Town.t;
+      case Address:
+        return Address.t;
+      case Child:
+        return Child.t;
+      case Citizen:
+        return Citizen.t;
+      case Company:
+        return Company.t;
+      case Parent:
+        return Parent.t;
+      case Town:
+        return Town.t;
       case _i36.Blocking:
         return _i36.Blocking.t;
       case _i37.Member:

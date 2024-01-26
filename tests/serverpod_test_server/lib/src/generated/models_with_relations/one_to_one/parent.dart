@@ -8,20 +8,26 @@
 // ignore_for_file: type_literal_in_constant_pattern
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../../protocol.dart' as _i2;
+part of protocol;
 
 abstract class Parent extends _i1.TableRow {
   Parent._({
     int? id,
     required this.childId,
-    this.child,
-  }) : super(id);
+    Child? child,
+  })  : _child = child,
+        super(id) {
+    if (child != null && child.id == null) {
+      throw ArgumentError.notNull('child.id');
+    }
+
+    child?.parent = this;
+  }
 
   factory Parent({
     int? id,
     required int childId,
-    _i2.Child? child,
+    Child? child,
   }) = _ParentImpl;
 
   factory Parent.fromJson(
@@ -32,8 +38,8 @@ abstract class Parent extends _i1.TableRow {
       id: serializationManager.deserialize<int?>(jsonSerialization['id']),
       childId:
           serializationManager.deserialize<int>(jsonSerialization['childId']),
-      child: serializationManager
-          .deserialize<_i2.Child?>(jsonSerialization['child']),
+      child:
+          serializationManager.deserialize<Child?>(jsonSerialization['child']),
     );
   }
 
@@ -43,7 +49,16 @@ abstract class Parent extends _i1.TableRow {
 
   int childId;
 
-  _i2.Child? child;
+  Child? _child;
+
+  set child(Child? child) {
+    if (child != null && child.id == null) {
+      throw ArgumentError.notNull('child.id');
+    }
+    _child = child;
+  }
+
+  Child? get child => _child;
 
   @override
   _i1.Table get table => t;
@@ -51,8 +66,9 @@ abstract class Parent extends _i1.TableRow {
   Parent copyWith({
     int? id,
     int? childId,
-    _i2.Child? child,
+    Child? child,
   });
+
   @override
   Map<String, dynamic> toJson() {
     return {
@@ -222,7 +238,7 @@ abstract class Parent extends _i1.TableRow {
     );
   }
 
-  static ParentInclude include({_i2.ChildInclude? child}) {
+  static ParentInclude include({ChildInclude? child}) {
     return ParentInclude._(child: child);
   }
 
@@ -247,13 +263,11 @@ abstract class Parent extends _i1.TableRow {
   }
 }
 
-class _Undefined {}
-
 class _ParentImpl extends Parent {
   _ParentImpl({
     int? id,
     required int childId,
-    _i2.Child? child,
+    Child? child,
   }) : super._(
           id: id,
           childId: childId,
@@ -266,11 +280,41 @@ class _ParentImpl extends Parent {
     int? childId,
     Object? child = _Undefined,
   }) {
+    if (child is Child && childId is int && child.id != childId) {
+      throw ArgumentError('Inconsistent value for child.id and childId.');
+    }
+
     return Parent(
       id: id is int? ? id : this.id,
       childId: childId ?? this.childId,
-      child: child is _i2.Child? ? child : this.child?.copyWith(),
+      child: child is Child? ? child : this.child?.copyWith(),
     );
+  }
+
+  @override
+  Map<String, dynamic> toJson({Set<Object>? $visited, Object? $previous}) {
+    var _visited = $visited ?? Set<Object>();
+    _visited.add(this);
+
+    var __child = child;
+
+    return {
+      if (id != null) 'id': id,
+      'childId': childId,
+      if (__child is _ChildImpl && $previous != __child)
+        'child': __child.toJson($visited: _visited, $previous: this),
+    };
+  }
+
+  @override
+  Map<String, dynamic> allToJson({Child? $child}) {
+    var __child = child;
+    return {
+      if (id != null) 'id': id,
+      'childId': childId,
+      if (__child is _ChildImpl && $child != __child)
+        'child': __child.toJson($previous: this),
+    };
   }
 }
 
@@ -284,17 +328,17 @@ class ParentTable extends _i1.Table {
 
   late final _i1.ColumnInt childId;
 
-  _i2.ChildTable? _child;
+  ChildTable? _child;
 
-  _i2.ChildTable get child {
+  ChildTable get child {
     if (_child != null) return _child!;
     _child = _i1.createRelationTable(
       relationFieldName: 'child',
       field: Parent.t.childId,
-      foreignField: _i2.Child.t.id,
+      foreignField: Child.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.ChildTable(tableRelation: foreignTableRelation),
+          ChildTable(tableRelation: foreignTableRelation),
     );
     return _child!;
   }
@@ -318,11 +362,11 @@ class ParentTable extends _i1.Table {
 ParentTable tParent = ParentTable();
 
 class ParentInclude extends _i1.IncludeObject {
-  ParentInclude._({_i2.ChildInclude? child}) {
+  ParentInclude._({ChildInclude? child}) {
     _child = child;
   }
 
-  _i2.ChildInclude? _child;
+  ChildInclude? _child;
 
   @override
   Map<String, _i1.Include?> get includes => {'child': _child};
@@ -514,7 +558,7 @@ class ParentAttachRowRepository {
   Future<void> child(
     _i1.Session session,
     Parent parent,
-    _i2.Child child,
+    Child child,
   ) async {
     if (parent.id == null) {
       throw ArgumentError.notNull('parent.id');

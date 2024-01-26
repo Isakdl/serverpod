@@ -8,8 +8,7 @@
 // ignore_for_file: type_literal_in_constant_pattern
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../../protocol.dart' as _i2;
+part of protocol;
 
 abstract class Citizen extends _i1.TableRow {
   Citizen._({
@@ -25,11 +24,11 @@ abstract class Citizen extends _i1.TableRow {
   factory Citizen({
     int? id,
     required String name,
-    _i2.Address? address,
+    Address? address,
     required int companyId,
-    _i2.Company? company,
+    Company? company,
     int? oldCompanyId,
-    _i2.Company? oldCompany,
+    Company? oldCompany,
   }) = _CitizenImpl;
 
   factory Citizen.fromJson(
@@ -40,15 +39,15 @@ abstract class Citizen extends _i1.TableRow {
       id: serializationManager.deserialize<int?>(jsonSerialization['id']),
       name: serializationManager.deserialize<String>(jsonSerialization['name']),
       address: serializationManager
-          .deserialize<_i2.Address?>(jsonSerialization['address']),
+          .deserialize<Address?>(jsonSerialization['address']),
       companyId:
           serializationManager.deserialize<int>(jsonSerialization['companyId']),
       company: serializationManager
-          .deserialize<_i2.Company?>(jsonSerialization['company']),
+          .deserialize<Company?>(jsonSerialization['company']),
       oldCompanyId: serializationManager
           .deserialize<int?>(jsonSerialization['oldCompanyId']),
       oldCompany: serializationManager
-          .deserialize<_i2.Company?>(jsonSerialization['oldCompany']),
+          .deserialize<Company?>(jsonSerialization['oldCompany']),
     );
   }
 
@@ -58,15 +57,15 @@ abstract class Citizen extends _i1.TableRow {
 
   String name;
 
-  _i2.Address? address;
+  Address? address;
 
   int companyId;
 
-  _i2.Company? company;
+  Company? company;
 
   int? oldCompanyId;
 
-  _i2.Company? oldCompany;
+  Company? oldCompany;
 
   @override
   _i1.Table get table => t;
@@ -74,22 +73,39 @@ abstract class Citizen extends _i1.TableRow {
   Citizen copyWith({
     int? id,
     String? name,
-    _i2.Address? address,
+    Address? address,
     int? companyId,
-    _i2.Company? company,
+    Company? company,
     int? oldCompanyId,
-    _i2.Company? oldCompany,
-  });
+    Company? oldCompany,
+  }) {
+    return this;
+  }
+
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({Set<Object>? $visited, Object? $previous}) {
+    var _visited = $visited ?? {};
+
+    if (_visited.contains(this)) {
+      throw StateError(
+        'Unable to convert object to a JSON representation because a circular reference was detected.',
+      );
+    }
+    _visited.add(this);
+
+    var _previousNode = $previous ?? this;
+    var _oldCompany = oldCompany;
+    var _company = company;
     return {
       if (id != null) 'id': id,
       'name': name,
-      if (address != null) 'address': address?.toJson(),
+      if (address != null && address != _previousNode) 'address': address,
       'companyId': companyId,
-      if (company != null) 'company': company?.toJson(),
+      if (_company != null && _company != _previousNode)
+        'company': _company.toJson($visited: _visited, $previous: this),
       if (oldCompanyId != null) 'oldCompanyId': oldCompanyId,
-      if (oldCompany != null) 'oldCompany': oldCompany?.toJson(),
+      if (_oldCompany != null && _oldCompany != _previousNode)
+        'oldCompany': _oldCompany.toJson($visited: _visited, $previous: this),
     };
   }
 
@@ -266,9 +282,9 @@ abstract class Citizen extends _i1.TableRow {
   }
 
   static CitizenInclude include({
-    _i2.AddressInclude? address,
-    _i2.CompanyInclude? company,
-    _i2.CompanyInclude? oldCompany,
+    AddressInclude? address,
+    CompanyInclude? company,
+    CompanyInclude? oldCompany,
   }) {
     return CitizenInclude._(
       address: address,
@@ -298,17 +314,15 @@ abstract class Citizen extends _i1.TableRow {
   }
 }
 
-class _Undefined {}
-
 class _CitizenImpl extends Citizen {
   _CitizenImpl({
     int? id,
     required String name,
-    _i2.Address? address,
+    Address? address,
     required int companyId,
-    _i2.Company? company,
+    Company? company,
     int? oldCompanyId,
-    _i2.Company? oldCompany,
+    Company? oldCompany,
   }) : super._(
           id: id,
           name: name,
@@ -332,12 +346,12 @@ class _CitizenImpl extends Citizen {
     return Citizen(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
-      address: address is _i2.Address? ? address : this.address?.copyWith(),
+      address: address is Address? ? address : this.address?.copyWith(),
       companyId: companyId ?? this.companyId,
-      company: company is _i2.Company? ? company : this.company?.copyWith(),
+      company: company is Company? ? company : this.company?.copyWith(),
       oldCompanyId: oldCompanyId is int? ? oldCompanyId : this.oldCompanyId,
       oldCompany:
-          oldCompany is _i2.Company? ? oldCompany : this.oldCompany?.copyWith(),
+          oldCompany is Company? ? oldCompany : this.oldCompany?.copyWith(),
     );
   }
 }
@@ -360,51 +374,51 @@ class CitizenTable extends _i1.Table {
 
   late final _i1.ColumnString name;
 
-  _i2.AddressTable? _address;
+  AddressTable? _address;
 
   late final _i1.ColumnInt companyId;
 
-  _i2.CompanyTable? _company;
+  CompanyTable? _company;
 
   late final _i1.ColumnInt oldCompanyId;
 
-  _i2.CompanyTable? _oldCompany;
+  CompanyTable? _oldCompany;
 
-  _i2.AddressTable get address {
+  AddressTable get address {
     if (_address != null) return _address!;
     _address = _i1.createRelationTable(
       relationFieldName: 'address',
       field: Citizen.t.id,
-      foreignField: _i2.Address.t.inhabitantId,
+      foreignField: Address.t.inhabitantId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.AddressTable(tableRelation: foreignTableRelation),
+          AddressTable(tableRelation: foreignTableRelation),
     );
     return _address!;
   }
 
-  _i2.CompanyTable get company {
+  CompanyTable get company {
     if (_company != null) return _company!;
     _company = _i1.createRelationTable(
       relationFieldName: 'company',
       field: Citizen.t.companyId,
-      foreignField: _i2.Company.t.id,
+      foreignField: Company.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.CompanyTable(tableRelation: foreignTableRelation),
+          CompanyTable(tableRelation: foreignTableRelation),
     );
     return _company!;
   }
 
-  _i2.CompanyTable get oldCompany {
+  CompanyTable get oldCompany {
     if (_oldCompany != null) return _oldCompany!;
     _oldCompany = _i1.createRelationTable(
       relationFieldName: 'oldCompany',
       field: Citizen.t.oldCompanyId,
-      foreignField: _i2.Company.t.id,
+      foreignField: Company.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.CompanyTable(tableRelation: foreignTableRelation),
+          CompanyTable(tableRelation: foreignTableRelation),
     );
     return _oldCompany!;
   }
@@ -437,20 +451,20 @@ CitizenTable tCitizen = CitizenTable();
 
 class CitizenInclude extends _i1.IncludeObject {
   CitizenInclude._({
-    _i2.AddressInclude? address,
-    _i2.CompanyInclude? company,
-    _i2.CompanyInclude? oldCompany,
+    AddressInclude? address,
+    CompanyInclude? company,
+    CompanyInclude? oldCompany,
   }) {
     _address = address;
     _company = company;
     _oldCompany = oldCompany;
   }
 
-  _i2.AddressInclude? _address;
+  AddressInclude? _address;
 
-  _i2.CompanyInclude? _company;
+  CompanyInclude? _company;
 
-  _i2.CompanyInclude? _oldCompany;
+  CompanyInclude? _oldCompany;
 
   @override
   Map<String, _i1.Include?> get includes => {
@@ -648,7 +662,7 @@ class CitizenAttachRowRepository {
   Future<void> address(
     _i1.Session session,
     Citizen citizen,
-    _i2.Address address,
+    Address address,
   ) async {
     if (address.id == null) {
       throw ArgumentError.notNull('address.id');
@@ -658,16 +672,16 @@ class CitizenAttachRowRepository {
     }
 
     var $address = address.copyWith(inhabitantId: citizen.id);
-    await session.dbNext.updateRow<_i2.Address>(
+    await session.dbNext.updateRow<Address>(
       $address,
-      columns: [_i2.Address.t.inhabitantId],
+      columns: [Address.t.inhabitantId],
     );
   }
 
   Future<void> company(
     _i1.Session session,
     Citizen citizen,
-    _i2.Company company,
+    Company company,
   ) async {
     if (citizen.id == null) {
       throw ArgumentError.notNull('citizen.id');
@@ -686,7 +700,7 @@ class CitizenAttachRowRepository {
   Future<void> oldCompany(
     _i1.Session session,
     Citizen citizen,
-    _i2.Company oldCompany,
+    Company oldCompany,
   ) async {
     if (citizen.id == null) {
       throw ArgumentError.notNull('citizen.id');
@@ -723,9 +737,9 @@ class CitizenDetachRowRepository {
     }
 
     var $$address = $address.copyWith(inhabitantId: null);
-    await session.dbNext.updateRow<_i2.Address>(
+    await session.dbNext.updateRow<Address>(
       $$address,
-      columns: [_i2.Address.t.inhabitantId],
+      columns: [Address.t.inhabitantId],
     );
   }
 

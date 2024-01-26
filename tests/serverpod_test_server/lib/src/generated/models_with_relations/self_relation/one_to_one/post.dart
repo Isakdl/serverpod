@@ -15,10 +15,27 @@ abstract class Post extends _i1.TableRow {
   Post._({
     int? id,
     required this.content,
-    this.previous,
-    this.nextId,
-    this.next,
-  }) : super(id);
+    Post? previous,
+    int? nextId,
+    Post? next,
+  })  : _nextId = next is Post ? next.id : nextId,
+        _next = next,
+        _previous = previous,
+        super(id) {
+    if (nextId is int && next is Post && nextId != next.id) {
+      throw ArgumentError(
+        'Inconsistent values for nextId ($nextId) and next.id (${next.id})',
+      );
+    }
+
+    if (next is Post) {
+      _next?.previous = this;
+    }
+
+    if (previous is Post) {
+      _previous?.next = this;
+    }
+  }
 
   factory Post({
     int? id,
@@ -51,11 +68,45 @@ abstract class Post extends _i1.TableRow {
 
   String content;
 
-  _i2.Post? previous;
+  _i2.Post? _previous;
 
-  int? nextId;
+  set previous(_i2.Post? previous) {
+    if (previous == _previous) return;
 
-  _i2.Post? next;
+    _previous = previous;
+
+    if (_previous?.next != this) {
+      _previous?.nextId = this.id; //<- add test
+      _previous?.next = this;
+    }
+  }
+
+  _i2.Post? get previous => _previous;
+
+  int? _nextId;
+
+  _i2.Post? _next;
+
+  set nextId(int? nextId) {
+    if (_nextId == nextId) return;
+
+    _nextId = nextId;
+    _next = null;
+  }
+
+  int? get nextId => _nextId;
+  set next(_i2.Post? next) {
+    if (next == _next) return;
+
+    nextId = next?.id;
+    _next = next;
+
+    if (_next?.previous != this) {
+      _next?.previous = this;
+    }
+  }
+
+  _i2.Post? get next => _next;
 
   @override
   _i1.Table get table => t;
@@ -67,14 +118,35 @@ abstract class Post extends _i1.TableRow {
     int? nextId,
     _i2.Post? next,
   });
+
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() => internalToJson();
+
+  /// Internal serializer used by the framework.
+  /// Use [toJson] instead. This method might be removed in the future in a none major version.
+  Map<String, dynamic> internalToJson({
+    Set<Object>? $visited,
+    Object? $previous,
+  }) {
+    var _visited = $visited ?? {};
+
+    if (_visited.contains(this)) {
+      throw StateError(
+        'Unable to convert object to a JSON representation because a circular reference was detected.',
+      );
+    }
+    _visited.add(this);
+
+    var _previousNode = $previous ?? this;
     return {
       if (id != null) 'id': id,
       'content': content,
-      if (previous != null) 'previous': previous?.toJson(),
+      if (previous != null && _previousNode != previous)
+        'previous':
+            previous?.internalToJson($visited: _visited, $previous: this),
       if (nextId != null) 'nextId': nextId,
-      if (next != null) 'next': next?.toJson(),
+      if (next != null && _previousNode != next)
+        'next': next?.internalToJson($visited: _visited, $previous: this),
     };
   }
 
@@ -89,13 +161,33 @@ abstract class Post extends _i1.TableRow {
   }
 
   @override
-  Map<String, dynamic> allToJson() {
+  Map<String, dynamic> allToJson() => internalAllToJson();
+
+  /// Internal serializer used by the framework.
+  /// Use [toJson] instead. This method might be removed in the future in a none major version.
+  Map<String, dynamic> internalAllToJson({
+    Set<Object>? $visited,
+    Object? $previous,
+  }) {
+    var _visited = $visited ?? {};
+
+    if (_visited.contains(this)) {
+      throw StateError(
+        'Unable to convert object to a JSON representation because a circular reference was detected.',
+      );
+    }
+    _visited.add(this);
+
+    var _previousNode = $previous ?? this;
     return {
       if (id != null) 'id': id,
       'content': content,
-      if (previous != null) 'previous': previous?.allToJson(),
+      if (previous != null && _previousNode != previous)
+        'previous':
+            previous?.internalAllToJson($visited: _visited, $previous: this),
       if (nextId != null) 'nextId': nextId,
-      if (next != null) 'next': next?.allToJson(),
+      if (next != null && _previousNode != next)
+        'next': next?.internalAllToJson($visited: _visited, $previous: this),
     };
   }
 
@@ -300,12 +392,27 @@ class _PostImpl extends Post {
     Object? nextId = _Undefined,
     Object? next = _Undefined,
   }) {
+    if (nextId is int? && next is Post? && nextId != next?.id) {
+      throw ArgumentError(
+        'Inconsistent values for nextId ($nextId) and next.id ({$next?.id})',
+      );
+    }
+
+    var _nextId = nextId is int? ? nextId : this.nextId;
+    var _syncedNextId = next is Post? ? next?.id : _nextId;
+
+    var _syncedPrevious =
+        previous is Post? ? previous : this.previous?.copyWith(next: this);
+
+    var _next = next is Post? ? next : this.next?.copyWith(previous: this);
+    var _syncedNext = nextId is int && nextId != _next?.id ? null : _next;
+
     return Post(
       id: id is int? ? id : this.id,
       content: content ?? this.content,
-      previous: previous is _i2.Post? ? previous : this.previous?.copyWith(),
-      nextId: nextId is int? ? nextId : this.nextId,
-      next: next is _i2.Post? ? next : this.next?.copyWith(),
+      previous: _syncedPrevious,
+      nextId: _syncedNextId,
+      next: _syncedNext,
     );
   }
 }

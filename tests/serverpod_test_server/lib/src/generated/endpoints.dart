@@ -9,6 +9,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'package:serverpod_test_server/src/generated/protocol.dart';
 import '../endpoints/async_tasks.dart' as _i2;
 import '../endpoints/authentication.dart' as _i3;
 import '../endpoints/basic_types.dart' as _i4;
@@ -70,14 +71,6 @@ import 'package:serverpod_test_server/src/generated/models_with_list_relations/o
     as _i55;
 import 'package:serverpod_test_server/src/generated/models_with_list_relations/person.dart'
     as _i56;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/citizen.dart'
-    as _i57;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/company.dart'
-    as _i58;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/address.dart'
-    as _i59;
-import 'package:serverpod_test_server/src/generated/models_with_relations/one_to_one/town.dart'
-    as _i60;
 import 'package:serverpod_test_server/src/generated/models_with_relations/self_relation/one_to_one/post.dart'
     as _i61;
 import 'package:serverpod_test_server/src/generated/object_field_scopes.dart'
@@ -4107,12 +4100,12 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'citizen': _i1.ParameterDescription(
               name: 'citizen',
-              type: _i1.getType<_i57.Citizen>(),
+              type: _i1.getType<Citizen>(),
               nullable: false,
             ),
             'company': _i1.ParameterDescription(
               name: 'company',
-              type: _i1.getType<_i58.Company>(),
+              type: _i1.getType<Company>(),
               nullable: false,
             ),
           },
@@ -4132,12 +4125,12 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'citizen': _i1.ParameterDescription(
               name: 'citizen',
-              type: _i1.getType<_i57.Citizen>(),
+              type: _i1.getType<Citizen>(),
               nullable: false,
             ),
             'address': _i1.ParameterDescription(
               name: 'address',
-              type: _i1.getType<_i59.Address>(),
+              type: _i1.getType<Address>(),
               nullable: false,
             ),
           },
@@ -4157,7 +4150,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'citizen': _i1.ParameterDescription(
               name: 'citizen',
-              type: _i1.getType<_i57.Citizen>(),
+              type: _i1.getType<Citizen>(),
               nullable: false,
             )
           },
@@ -4176,12 +4169,12 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'address': _i1.ParameterDescription(
               name: 'address',
-              type: _i1.getType<_i59.Address>(),
+              type: _i1.getType<Address>(),
               nullable: false,
             ),
             'citizen': _i1.ParameterDescription(
               name: 'citizen',
-              type: _i1.getType<_i57.Citizen>(),
+              type: _i1.getType<Citizen>(),
               nullable: false,
             ),
           },
@@ -4201,7 +4194,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'address': _i1.ParameterDescription(
               name: 'address',
-              type: _i1.getType<_i59.Address>(),
+              type: _i1.getType<Address>(),
               nullable: false,
             )
           },
@@ -4230,7 +4223,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'citizen': _i1.ParameterDescription(
               name: 'citizen',
-              type: _i1.getType<_i57.Citizen>(),
+              type: _i1.getType<Citizen>(),
               nullable: false,
             )
           },
@@ -4248,7 +4241,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'company': _i1.ParameterDescription(
               name: 'company',
-              type: _i1.getType<_i58.Company>(),
+              type: _i1.getType<Company>(),
               nullable: false,
             )
           },
@@ -4266,7 +4259,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'town': _i1.ParameterDescription(
               name: 'town',
-              type: _i1.getType<_i60.Town>(),
+              type: _i1.getType<Town>(),
               nullable: false,
             )
           },
@@ -4284,7 +4277,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'address': _i1.ParameterDescription(
               name: 'address',
-              type: _i1.getType<_i59.Address>(),
+              type: _i1.getType<Address>(),
               nullable: false,
             )
           },

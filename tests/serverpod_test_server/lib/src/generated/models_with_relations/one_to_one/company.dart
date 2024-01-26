@@ -8,22 +8,28 @@
 // ignore_for_file: type_literal_in_constant_pattern
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../../protocol.dart' as _i2;
+part of protocol;
 
 abstract class Company extends _i1.TableRow {
   Company._({
     int? id,
     required this.name,
     required this.townId,
-    this.town,
-  }) : super(id);
+    Town? town,
+  })  : _town = town,
+        super(id) {
+    if (town is Town && town.id != townId) {
+      throw ArgumentError(
+        'The town object has id ${town.id} which does not match given townId $townId.',
+      );
+    }
+  }
 
   factory Company({
     int? id,
     required String name,
     required int townId,
-    _i2.Town? town,
+    Town? town,
   }) = _CompanyImpl;
 
   factory Company.fromJson(
@@ -35,8 +41,7 @@ abstract class Company extends _i1.TableRow {
       name: serializationManager.deserialize<String>(jsonSerialization['name']),
       townId:
           serializationManager.deserialize<int>(jsonSerialization['townId']),
-      town: serializationManager
-          .deserialize<_i2.Town?>(jsonSerialization['town']),
+      town: serializationManager.deserialize<Town?>(jsonSerialization['town']),
     );
   }
 
@@ -48,7 +53,23 @@ abstract class Company extends _i1.TableRow {
 
   int townId;
 
-  _i2.Town? town;
+  Town? _town;
+
+  set town(Town? town) {
+    if (town != null && town.id == null) {
+      throw ArgumentError('Given object has no id: $town. Are you sure it is '
+          'saved in the database?');
+    }
+    _town = town;
+
+    if (town != null) {
+      townId = town.id!;
+    }
+  }
+
+  Town? get town {
+    return _town;
+  }
 
   @override
   _i1.Table get table => t;
@@ -57,15 +78,27 @@ abstract class Company extends _i1.TableRow {
     int? id,
     String? name,
     int? townId,
-    _i2.Town? town,
+    Town? town,
   });
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({Set<Object>? $visited, Object? $previous}) {
+    var _visited = $visited ?? {};
+
+    if (_visited.contains(this)) {
+      throw StateError(
+        'Unable to convert object to a JSON representation because a circular reference was detected.',
+      );
+    }
+    _visited.add(this);
+
+    var _previousNode = $previous ?? this;
+    var _town = town;
     return {
       if (id != null) 'id': id,
       'name': name,
       'townId': townId,
-      if (town != null) 'town': town?.toJson(),
+      if (_town != null && _town != _previousNode)
+        'town': _town.toJson($visited: _visited, $previous: this),
     };
   }
 
@@ -234,7 +267,7 @@ abstract class Company extends _i1.TableRow {
     );
   }
 
-  static CompanyInclude include({_i2.TownInclude? town}) {
+  static CompanyInclude include({TownInclude? town}) {
     return CompanyInclude._(town: town);
   }
 
@@ -259,14 +292,12 @@ abstract class Company extends _i1.TableRow {
   }
 }
 
-class _Undefined {}
-
 class _CompanyImpl extends Company {
   _CompanyImpl({
     int? id,
     required String name,
     required int townId,
-    _i2.Town? town,
+    Town? town,
   }) : super._(
           id: id,
           name: name,
@@ -281,11 +312,16 @@ class _CompanyImpl extends Company {
     int? townId,
     Object? town = _Undefined,
   }) {
+    if (town is Town && town.id == null) {
+      throw ArgumentError('Given object has no id: $town. Are you sure it is '
+          'saved in the database?');
+    }
+
     return Company(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       townId: townId ?? this.townId,
-      town: town is _i2.Town? ? town : this.town?.copyWith(),
+      town: town is Town? ? town : this.town?.copyWith(),
     );
   }
 }
@@ -306,17 +342,17 @@ class CompanyTable extends _i1.Table {
 
   late final _i1.ColumnInt townId;
 
-  _i2.TownTable? _town;
+  TownTable? _town;
 
-  _i2.TownTable get town {
+  TownTable get town {
     if (_town != null) return _town!;
     _town = _i1.createRelationTable(
       relationFieldName: 'town',
       field: Company.t.townId,
-      foreignField: _i2.Town.t.id,
+      foreignField: Town.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.TownTable(tableRelation: foreignTableRelation),
+          TownTable(tableRelation: foreignTableRelation),
     );
     return _town!;
   }
@@ -341,11 +377,11 @@ class CompanyTable extends _i1.Table {
 CompanyTable tCompany = CompanyTable();
 
 class CompanyInclude extends _i1.IncludeObject {
-  CompanyInclude._({_i2.TownInclude? town}) {
+  CompanyInclude._({TownInclude? town}) {
     _town = town;
   }
 
-  _i2.TownInclude? _town;
+  TownInclude? _town;
 
   @override
   Map<String, _i1.Include?> get includes => {'town': _town};
@@ -537,7 +573,7 @@ class CompanyAttachRowRepository {
   Future<void> town(
     _i1.Session session,
     Company company,
-    _i2.Town town,
+    Town town,
   ) async {
     if (company.id == null) {
       throw ArgumentError.notNull('company.id');
