@@ -312,7 +312,7 @@ void main() {
       'Given a double linked relation with ids when setting the origin side in the setter method then the object field is set on the origin side.',
       () {
     var child = Child(id: 2);
-    var parent = Parent(id: 1, childId: 2, child: child);
+    var parent = Parent(id: 1, childId: 3);
 
     parent.child = child;
 
