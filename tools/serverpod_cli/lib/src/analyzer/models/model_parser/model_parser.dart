@@ -403,36 +403,35 @@ class ModelParser {
     var indexesNode = documentContents.nodes[Keyword.indexes];
     if (indexesNode is! YamlMap) return [];
 
-    var indexes = indexesNode.nodes.entries.map((node) {
+    var indexes = indexesNode.nodes.entries
+        .expand<SerializableModelIndexDefinition>((node) {
       var keyScalar = node.key;
       var nodeDocument = node.value;
-      if (keyScalar is! YamlScalar) return null;
-      if (nodeDocument is! YamlMap) return null;
+      if (keyScalar is! YamlScalar) return [];
+      if (nodeDocument is! YamlMap) return [];
 
       var indexName = keyScalar.value;
-      if (indexName is! String) return null;
+      if (indexName is! String) return [];
 
-      var indexFields = _parseIndexFields(nodeDocument, fields);
+      var indexFields = _parseIndexFields(nodeDocument);
       var type = _parseIndexType(nodeDocument);
       var unique = _parseUniqueKey(nodeDocument);
 
-      return SerializableModelIndexDefinition(
-        name: indexName,
-        type: type,
-        unique: unique,
-        fields: indexFields,
-      );
+      return [
+        SerializableModelIndexDefinition(
+          name: indexName,
+          type: type,
+          unique: unique,
+          fields: indexFields,
+        )
+      ];
     });
 
-    return indexes
-        .where((index) => index != null)
-        .cast<SerializableModelIndexDefinition>()
-        .toList();
+    return indexes.toList();
   }
 
   static List<String> _parseIndexFields(
     YamlMap documentContents,
-    List<SerializableModelFieldDefinition> fields,
   ) {
     var fieldsNode = documentContents.nodes[Keyword.fields];
     if (fieldsNode is! YamlNode) return [];
