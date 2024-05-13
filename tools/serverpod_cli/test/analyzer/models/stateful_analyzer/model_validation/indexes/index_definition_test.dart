@@ -279,4 +279,45 @@ void main() {
       'The "invalidKey" property is not allowed for example_index type. Valid keys are {fields, type, unique}.',
     );
   });
+
+  group(
+    'Given a class with an index defined directly on the field',
+    () {
+      var models = [
+        ModelSourceBuilder().withYaml(
+          '''
+          class: Example
+          table: example
+          fields:
+            name: String, indexed
+          ''',
+        ).build()
+      ];
+
+      var collector = CodeGenerationCollector();
+      var analyzer =
+          StatefulAnalyzer(config, models, onErrorsCollector(collector));
+      var definitions = analyzer.validateAll();
+
+      var errors = collector.errors;
+      test('then no errors are collected.', () {
+        expect(errors, isEmpty);
+      });
+
+      var definition = definitions.firstOrNull as ClassDefinition?;
+      test('then the index definition contains the fields of the index.', () {
+        var index = definition?.indexes.first;
+        var field = index?.fields.first;
+        expect(field, 'name');
+      }, skip: errors.isNotEmpty);
+
+      test('then the field definition has an auto generated index name.', () {
+        var field =
+            definition?.fields.firstWhere((field) => field.name == 'name');
+        var index = field?.indexes.firstOrNull;
+
+        expect(index?.name, 'example_name_idx');
+      }, skip: errors.isNotEmpty);
+    },
+  );
 }

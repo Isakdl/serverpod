@@ -65,6 +65,9 @@ class ClassYamlDefinition {
                 valueRestriction: restrictions.validateParentName,
               ),
               ValidateNode(
+                Keyword.indexed,
+              ),
+              ValidateNode(
                 Keyword.relation,
                 keyRestriction: restrictions.validateRelationKey,
                 valueRestriction:

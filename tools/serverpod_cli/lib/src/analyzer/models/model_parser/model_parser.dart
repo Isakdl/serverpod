@@ -43,7 +43,7 @@ class ModelParser {
       extraClasses,
       serverOnly,
     );
-    var indexes = _parseIndexes(documentContents, fields);
+    var indexes = _parseIndexes(documentContents, fields, tableName);
 
     var migrationValue =
         documentContents.nodes[Keyword.managedMigration]?.value;
@@ -399,6 +399,49 @@ class ModelParser {
   static List<SerializableModelIndexDefinition> _parseIndexes(
     YamlMap documentContents,
     List<SerializableModelFieldDefinition> fields,
+    String? tableName,
+  ) {
+    if (tableName == null) return [];
+
+    var fieldIndexes = _parseFieldIndex(documentContents, fields, tableName);
+    var multiIndexes = _parseComplexIndexes(documentContents, fields);
+    return [...fieldIndexes, ...multiIndexes];
+  }
+
+  static Iterable<SerializableModelIndexDefinition> _parseFieldIndex(
+    YamlMap documentContents,
+    List<SerializableModelFieldDefinition> fields,
+    String tableName,
+  ) {
+    var yamlFields = documentContents.nodes[Keyword.fields]?.value;
+    if (yamlFields is! YamlMap) return [];
+
+    return fields.expand<SerializableModelIndexDefinition>((field) {
+      var fieldNode = yamlFields.nodes[field.name]?.value;
+  
+
+      if (fieldNode is! YamlMap) return [];
+
+      var indexedNode = fieldNode.nodes[Keyword.indexed];
+      print('looking for indexed');
+      if (indexedNode == null) return [];
+
+      print('found it!');
+
+      return [
+        SerializableModelIndexDefinition(
+          name: '${tableName}_${field.name}_idx',
+          fields: [field.name],
+          unique: false,
+          type: 'brin',
+        )
+      ];
+    });
+  }
+
+  static Iterable<SerializableModelIndexDefinition> _parseComplexIndexes(
+    YamlMap documentContents,
+    List<SerializableModelFieldDefinition> fields,
   ) {
     var indexesNode = documentContents.nodes[Keyword.indexes];
     if (indexesNode is! YamlMap) return [];
@@ -427,7 +470,7 @@ class ModelParser {
       ];
     });
 
-    return indexes.toList();
+    return indexes;
   }
 
   static List<String> _parseIndexFields(
