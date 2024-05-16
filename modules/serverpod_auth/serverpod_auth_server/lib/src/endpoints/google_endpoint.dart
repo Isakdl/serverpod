@@ -9,6 +9,7 @@ import 'package:googleapis_auth/auth_io.dart';
 // ignore: implementation_imports
 import 'package:googleapis_auth/src/auth_http_utils.dart';
 import 'package:http/http.dart' as http;
+import 'package:serverpod/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/src/business/config.dart';
 import 'package:serverpod_auth_server/src/business/google_auth.dart';
@@ -17,7 +18,7 @@ import 'package:serverpod_auth_server/src/business/user_images.dart';
 import '../business/users.dart';
 import '../generated/protocol.dart';
 
-const _authMethod = 'google';
+const _provider = 'google';
 
 /// Endpoint for handling Sign in with Google.
 class GoogleEndpoint extends Endpoint {
@@ -67,8 +68,9 @@ class GoogleEndpoint extends Endpoint {
     email = email.toLowerCase();
 
     var userInfo = await _setupUserInfo(session, email, name, fullName, image);
+    var authId = userInfo?.authId;
 
-    if (userInfo == null) {
+    if (userInfo == null || authId == null) {
       return AuthenticationResponse(
         success: false,
         failReason: AuthenticationFailReason.userCreationDenied,
@@ -98,14 +100,18 @@ class GoogleEndpoint extends Endpoint {
       }
     }
 
-    var authKey = await session.auth.signInUser(userInfo.id!, _authMethod);
+    var refreshToken = await ServerpodAuth.issueRefreshToken(
+      session,
+      authId,
+      _provider,
+    );
 
     authClient.close();
 
     return AuthenticationResponse(
       success: true,
-      keyId: authKey.id,
-      key: authKey.key,
+      keyId: refreshToken.id,
+      key: refreshToken.token,
       userInfo: userInfo,
     );
   }
@@ -165,7 +171,8 @@ class GoogleEndpoint extends Endpoint {
 
       var userInfo =
           await _setupUserInfo(session, email, name, fullName, image);
-      if (userInfo == null) {
+      var authId = userInfo?.authId;
+      if (userInfo == null || authId == null) {
         session.log('Failed to create UserInfo', level: LogLevel.debug);
         return AuthenticationResponse(
           success: false,
@@ -173,14 +180,16 @@ class GoogleEndpoint extends Endpoint {
         );
       }
 
-      // Authentication looks ok!
-
-      var authKey = await session.auth.signInUser(userInfo.id!, 'google');
+      var refreshToken = await ServerpodAuth.issueRefreshToken(
+        session,
+        authId,
+        _provider,
+      );
 
       return AuthenticationResponse(
         success: true,
-        keyId: authKey.id,
-        key: authKey.key,
+        keyId: refreshToken.id,
+        key: refreshToken.token,
         userInfo: userInfo,
       );
     } catch (e, stackTrace) {
@@ -207,7 +216,7 @@ class GoogleEndpoint extends Endpoint {
         created: DateTime.now().toUtc(),
         scopeNames: [],
       );
-      userInfo = await Users.createUser(session, userInfo, _authMethod);
+      userInfo = await Users.createUser(session, userInfo, _provider);
 
       // Set the user image.
       if (userInfo?.id != null && image != null) {

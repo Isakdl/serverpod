@@ -27,6 +27,8 @@ abstract class UserInfo extends _i1.TableRow
     required this.created,
     this.imageUrl,
     required this.scopeNames,
+    this.authId,
+    this.auth,
     required this.blocked,
   }) : super(id);
 
@@ -39,6 +41,8 @@ abstract class UserInfo extends _i1.TableRow
     required DateTime created,
     String? imageUrl,
     required List<String> scopeNames,
+    int? authId,
+    _i1.AuthId? auth,
     required bool blocked,
   }) = _UserInfoImpl;
 
@@ -54,6 +58,11 @@ abstract class UserInfo extends _i1.TableRow
       scopeNames: (jsonSerialization['scopeNames'] as List)
           .map((e) => e as String)
           .toList(),
+      authId: jsonSerialization['authId'] as int?,
+      auth: jsonSerialization['auth'] == null
+          ? null
+          : _i1.AuthId.fromJson(
+              (jsonSerialization['auth'] as Map<String, dynamic>)),
       blocked: jsonSerialization['blocked'] as bool,
     );
   }
@@ -84,6 +93,12 @@ abstract class UserInfo extends _i1.TableRow
   /// List of scopes that this user can access.
   List<String> scopeNames;
 
+  /// The identifier of the user's auth object.
+  int? authId;
+
+  /// The auth identifier of the user.
+  _i1.AuthId? auth;
+
   /// True if the user is blocked from signing in.
   bool blocked;
 
@@ -99,6 +114,8 @@ abstract class UserInfo extends _i1.TableRow
     DateTime? created,
     String? imageUrl,
     List<String>? scopeNames,
+    int? authId,
+    _i1.AuthId? auth,
     bool? blocked,
   });
   @override
@@ -112,6 +129,8 @@ abstract class UserInfo extends _i1.TableRow
       'created': created.toJson(),
       if (imageUrl != null) 'imageUrl': imageUrl,
       'scopeNames': scopeNames.toJson(),
+      if (authId != null) 'authId': authId,
+      if (auth != null) 'auth': auth?.toJson(),
       'blocked': blocked,
     };
   }
@@ -131,8 +150,8 @@ abstract class UserInfo extends _i1.TableRow
     };
   }
 
-  static UserInfoInclude include() {
-    return UserInfoInclude._();
+  static UserInfoInclude include({_i1.AuthIdInclude? auth}) {
+    return UserInfoInclude._(auth: auth);
   }
 
   static UserInfoIncludeList includeList({
@@ -168,6 +187,8 @@ class _UserInfoImpl extends UserInfo {
     required DateTime created,
     String? imageUrl,
     required List<String> scopeNames,
+    int? authId,
+    _i1.AuthId? auth,
     required bool blocked,
   }) : super._(
           id: id,
@@ -178,6 +199,8 @@ class _UserInfoImpl extends UserInfo {
           created: created,
           imageUrl: imageUrl,
           scopeNames: scopeNames,
+          authId: authId,
+          auth: auth,
           blocked: blocked,
         );
 
@@ -191,6 +214,8 @@ class _UserInfoImpl extends UserInfo {
     DateTime? created,
     Object? imageUrl = _Undefined,
     List<String>? scopeNames,
+    Object? authId = _Undefined,
+    Object? auth = _Undefined,
     bool? blocked,
   }) {
     return UserInfo(
@@ -202,6 +227,8 @@ class _UserInfoImpl extends UserInfo {
       created: created ?? this.created,
       imageUrl: imageUrl is String? ? imageUrl : this.imageUrl,
       scopeNames: scopeNames ?? this.scopeNames.clone(),
+      authId: authId is int? ? authId : this.authId,
+      auth: auth is _i1.AuthId? ? auth : this.auth?.copyWith(),
       blocked: blocked ?? this.blocked,
     );
   }
@@ -238,6 +265,10 @@ class UserInfoTable extends _i1.Table {
       'scopeNames',
       this,
     );
+    authId = _i1.ColumnInt(
+      'authId',
+      this,
+    );
     blocked = _i1.ColumnBool(
       'blocked',
       this,
@@ -266,8 +297,27 @@ class UserInfoTable extends _i1.Table {
   /// List of scopes that this user can access.
   late final _i1.ColumnSerializable scopeNames;
 
+  /// The identifier of the user's auth object.
+  late final _i1.ColumnInt authId;
+
+  /// The auth identifier of the user.
+  _i1.AuthIdTable? _auth;
+
   /// True if the user is blocked from signing in.
   late final _i1.ColumnBool blocked;
+
+  _i1.AuthIdTable get auth {
+    if (_auth != null) return _auth!;
+    _auth = _i1.createRelationTable(
+      relationFieldName: 'auth',
+      field: UserInfo.t.authId,
+      foreignField: _i1.AuthId.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i1.AuthIdTable(tableRelation: foreignTableRelation),
+    );
+    return _auth!;
+  }
 
   @override
   List<_i1.Column> get columns => [
@@ -279,15 +329,28 @@ class UserInfoTable extends _i1.Table {
         created,
         imageUrl,
         scopeNames,
+        authId,
         blocked,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'auth') {
+      return auth;
+    }
+    return null;
+  }
 }
 
 class UserInfoInclude extends _i1.IncludeObject {
-  UserInfoInclude._();
+  UserInfoInclude._({_i1.AuthIdInclude? auth}) {
+    _auth = auth;
+  }
+
+  _i1.AuthIdInclude? _auth;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {'auth': _auth};
 
   @override
   _i1.Table get table => UserInfo.t;
@@ -316,6 +379,10 @@ class UserInfoIncludeList extends _i1.IncludeList {
 class UserInfoRepository {
   const UserInfoRepository._();
 
+  final attachRow = const UserInfoAttachRowRepository._();
+
+  final detachRow = const UserInfoDetachRowRepository._();
+
   Future<List<UserInfo>> find(
     _i1.Session session, {
     _i1.WhereExpressionBuilder<UserInfoTable>? where,
@@ -325,6 +392,7 @@ class UserInfoRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<UserInfoTable>? orderByList,
     _i1.Transaction? transaction,
+    UserInfoInclude? include,
   }) async {
     return session.db.find<UserInfo>(
       where: where?.call(UserInfo.t),
@@ -334,6 +402,7 @@ class UserInfoRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -345,6 +414,7 @@ class UserInfoRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<UserInfoTable>? orderByList,
     _i1.Transaction? transaction,
+    UserInfoInclude? include,
   }) async {
     return session.db.findFirstRow<UserInfo>(
       where: where?.call(UserInfo.t),
@@ -353,6 +423,7 @@ class UserInfoRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -360,10 +431,12 @@ class UserInfoRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    UserInfoInclude? include,
   }) async {
     return session.db.findById<UserInfo>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -458,6 +531,48 @@ class UserInfoRepository {
       where: where?.call(UserInfo.t),
       limit: limit,
       transaction: transaction,
+    );
+  }
+}
+
+class UserInfoAttachRowRepository {
+  const UserInfoAttachRowRepository._();
+
+  Future<void> auth(
+    _i1.Session session,
+    UserInfo userInfo,
+    _i1.AuthId auth,
+  ) async {
+    if (userInfo.id == null) {
+      throw ArgumentError.notNull('userInfo.id');
+    }
+    if (auth.id == null) {
+      throw ArgumentError.notNull('auth.id');
+    }
+
+    var $userInfo = userInfo.copyWith(authId: auth.id);
+    await session.db.updateRow<UserInfo>(
+      $userInfo,
+      columns: [UserInfo.t.authId],
+    );
+  }
+}
+
+class UserInfoDetachRowRepository {
+  const UserInfoDetachRowRepository._();
+
+  Future<void> auth(
+    _i1.Session session,
+    UserInfo userinfo,
+  ) async {
+    if (userinfo.id == null) {
+      throw ArgumentError.notNull('userinfo.id');
+    }
+
+    var $userinfo = userinfo.copyWith(authId: null);
+    await session.db.updateRow<UserInfo>(
+      $userinfo,
+      columns: [UserInfo.t.authId],
     );
   }
 }

@@ -1,0 +1,6 @@
+class: AuthId
+serverOnly: true
+table: serverpod_auth_id
+fields:
+  scopes: List<String>
+  refreshTokens: List<RefreshToken>?, relation

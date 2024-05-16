@@ -1,0 +1,12 @@
+class: RefreshToken
+serverOnly: true
+table: serverpod_refresh_token
+fields:
+  authId: int, relation(parent=serverpod_auth_id, onDelete=cascade)
+  token: String, !persist
+  tokenHash: String
+  provider: String
+  expiresAt: DateTime?
+indexes:
+  serverpod_refresh_token_authId_idx:
+    fields: authId

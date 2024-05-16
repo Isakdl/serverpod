@@ -8,7 +8,7 @@ import '../business/users.dart';
 import '../generated/protocol.dart';
 
 List<Map<String, dynamic>>? _applePublicKeys;
-const _authMethod = 'apple';
+const _provider = 'apple';
 
 /// Endpoint for handling Sign in with Apple.
 class AppleEndpoint extends Endpoint {
@@ -93,13 +93,21 @@ class AppleEndpoint extends Endpoint {
         created: DateTime.now().toUtc(),
         scopeNames: [],
       );
-      userInfo = await Users.createUser(session, userInfo, _authMethod);
+      userInfo = await Users.createUser(session, userInfo, _provider);
     }
+
+    var authId = userInfo?.authId;
 
     if (userInfo == null) {
       return AuthenticationResponse(
         success: false,
         failReason: AuthenticationFailReason.userCreationDenied,
+      );
+    } else if (authId == null) {
+      // This should never happen
+      return AuthenticationResponse(
+        success: false,
+        failReason: AuthenticationFailReason.internalError,
       );
     } else if (userInfo.blocked) {
       return AuthenticationResponse(
@@ -108,12 +116,16 @@ class AppleEndpoint extends Endpoint {
       );
     }
 
-    var authKey = await session.auth.signInUser(userInfo.id!, _authMethod);
+    var refreshToken = await ServerpodAuth.issueRefreshToken(
+      session,
+      authId,
+      _provider,
+    );
 
     return AuthenticationResponse(
       success: true,
-      keyId: authKey.id,
-      key: authKey.key,
+      keyId: refreshToken.id,
+      key: refreshToken.token,
       userInfo: userInfo,
     );
   }

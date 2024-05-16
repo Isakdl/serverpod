@@ -12,10 +12,14 @@ export 'package:serverpod/relic.dart';
 // Database
 export 'package:serverpod/database.dart';
 
+// Authentication
+export 'package:serverpod/authentication.dart';
+
 // Serialization and logging
 export 'package:serverpod_serialization/serverpod_serialization.dart';
 export 'package:serverpod/src/util/http_request_extension.dart';
 export 'package:serverpod/src/generated/log_level.dart';
+export 'package:serverpod/src/generated/auth_id.dart';
 
 // Cloud storage
 export 'package:serverpod/src/cloud_storage/cloud_storage.dart';

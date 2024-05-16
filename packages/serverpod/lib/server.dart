@@ -1,7 +1,5 @@
 library server;
 
-export 'src/authentication/authentication_info.dart';
-export 'src/authentication/scope.dart';
 export 'src/generated/server_health_metric.dart';
 export 'src/serialization/serialization_manager.dart';
 export 'src/server/endpoint.dart';

@@ -7,6 +7,8 @@ import 'package:serverpod_auth_server/src/business/email_secrets.dart';
 import 'package:serverpod_auth_server/src/business/password_hash.dart';
 import 'package:serverpod_auth_server/src/business/user_images.dart';
 
+const _provider = 'email';
+
 /// Collection of utility methods when working with email authentication.
 class Emails {
   /// Generates a password hash from a users password and email. This value
@@ -546,10 +548,17 @@ class Emails {
     }
 
     var userInfo = await Users.findUserByUserId(session, entry.userId);
+    var authId = userInfo?.authId;
     if (userInfo == null) {
       return AuthenticationResponse(
         success: false,
         failReason: AuthenticationFailReason.invalidCredentials,
+      );
+    } else if (authId == null) {
+      // This should never happen
+      return AuthenticationResponse(
+        success: false,
+        failReason: AuthenticationFailReason.internalError,
       );
     } else if (userInfo.blocked) {
       return AuthenticationResponse(
@@ -561,10 +570,11 @@ class Emails {
     session.log(' - user found', level: LogLevel.debug);
 
     // Sign in user and return user info
-    var auth = await session.auth.signInUser(
-      entry.userId,
-      'email',
-      scopes: userInfo.scopes,
+
+    var refreshToken = await ServerpodAuth.issueRefreshToken(
+      session,
+      userInfo.authId!,
+      _provider,
     );
 
     session.log(' - user signed in', level: LogLevel.debug);
@@ -572,8 +582,8 @@ class Emails {
     return AuthenticationResponse(
       success: true,
       userInfo: userInfo,
-      key: auth.key,
-      keyId: auth.id,
+      key: refreshToken.token,
+      keyId: refreshToken.id,
     );
   }
 

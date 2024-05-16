@@ -48,15 +48,17 @@ class AuthenticationEndpoint extends Endpoint {
 
       if (userInfo == null) return AuthenticationResponse(success: false);
 
-      var authKey = await session.auth.signInUser(
-        userInfo.id!,
+      var refreshToken = await session.auth.issueRefreshToken(
+        userInfo.id!, // TODO fix this
         'test',
-        scopes: scopes?.map((e) => Scope(e)).toSet() ?? const {},
+        // TODO: set tokens when creating the user
+        //scopes: scopes?.map((e) => Scope(e)).toSet() ?? const {},
       );
+
       return AuthenticationResponse(
         success: true,
-        keyId: authKey.id,
-        key: authKey.key,
+        keyId: refreshToken.id,
+        key: refreshToken.token,
         userInfo: userInfo,
       );
     } else {
@@ -65,6 +67,7 @@ class AuthenticationEndpoint extends Endpoint {
   }
 
   Future<void> signOut(Session session) async {
-    await session.auth.signOutUser();
+    var authId = (await session.auth)?.authId;
+    await session.auth.revokeAllRefreshTokens(authId!);
   }
 }

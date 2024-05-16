@@ -28,6 +28,12 @@ fields:
   ### List of scopes that this user can access.
   scopeNames: List<String>
 
+  ### The identifier of the user's auth object.
+  authId: int?, scope=serverOnly
+
+  ### The auth identifier of the user.
+  auth: module:serverpod:AuthId?, relation(field=authId, onDelete=cascade), scope=serverOnly
+
   ### True if the user is blocked from signing in.
   blocked: bool
 indexes:

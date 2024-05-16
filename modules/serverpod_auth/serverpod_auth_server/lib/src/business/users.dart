@@ -1,3 +1,4 @@
+import 'package:serverpod/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/src/business/config.dart';
 
@@ -10,6 +11,7 @@ class Users {
     Session session,
     UserInfo userInfo, [
     String? authMethod,
+    Set<Scope> scopes = const {},
   ]) async {
     if (AuthConfig.current.onUserWillBeCreated != null) {
       var approved = await AuthConfig.current.onUserWillBeCreated!(
@@ -20,7 +22,16 @@ class Users {
       if (!approved) return null;
     }
 
-    userInfo = await UserInfo.db.insertRow(session, userInfo);
+    var authId = await ServerpodAuth.createAuthId(session, scopes: scopes);
+    userInfo.authId = authId.id;
+
+    userInfo = await UserInfo.db.insertRow(
+      session,
+      userInfo,
+    );
+
+    userInfo = userInfo.copyWith(authId: authId.id, auth: authId);
+
     if (userInfo.id != null) {
       if (AuthConfig.current.onUserCreated != null) {
         await AuthConfig.current.onUserCreated!(session, userInfo);
@@ -33,10 +44,21 @@ class Users {
   /// Finds a user by its email address. Returns null if no user is found.
   static Future<UserInfo?> findUserByEmail(
       Session session, String email) async {
-    return await UserInfo.db.findFirstRow(
+    var userInfo = await UserInfo.db.findFirstRow(
       session,
       where: (t) => t.email.equals(email),
+      include: UserInfo.include(
+        auth: AuthId.include(
+          refreshTokens: RefreshToken.includeList(),
+        ),
+      ),
     );
+
+    if (userInfo != null && userInfo.authId == null) {
+      userInfo = await _migrateToAuthId(session, userInfo);
+    }
+
+    return userInfo;
   }
 
   /// Finds a user by its sign in identifier. For Google sign ins, this is the
@@ -44,10 +66,42 @@ class Users {
   /// Returns null if no user is found.
   static Future<UserInfo?> findUserByIdentifier(
       Session session, String identifier) async {
-    return await UserInfo.db.findFirstRow(
+    var userInfo = await UserInfo.db.findFirstRow(
       session,
       where: (t) => t.userIdentifier.equals(identifier),
+      include: UserInfo.include(
+        auth: AuthId.include(
+          refreshTokens: RefreshToken.includeList(),
+        ),
+      ),
     );
+
+    if (userInfo != null && userInfo.authId == null) {
+      userInfo = await _migrateToAuthId(session, userInfo);
+    }
+
+    return userInfo;
+  }
+
+  static Future<UserInfo> _migrateToAuthId(
+    Session session,
+    UserInfo userInfo,
+  ) async {
+    var id = userInfo.id;
+
+    if (id == null) {
+      throw Error(); //todo real error
+    }
+
+    var authId = await ServerpodAuth.migrateTokenToAuthId(
+      session,
+      id,
+      userInfo.scopes,
+    );
+
+    userInfo = userInfo.copyWith(authId: authId.id, auth: authId);
+    await UserInfo.db.updateRow(session, userInfo);
+    return userInfo;
   }
 
   /// Find a user by its id. Returns null if no user is found. By default the
@@ -64,7 +118,15 @@ class Users {
       if (userInfo != null) return userInfo;
     }
 
-    userInfo = await UserInfo.db.findById(session, userId);
+    userInfo = await UserInfo.db.findById(
+      session,
+      userId,
+      include: UserInfo.include(
+        auth: AuthId.include(
+          refreshTokens: RefreshToken.includeList(),
+        ),
+      ),
+    );
 
     if (useCache && userInfo != null) {
       await session.caches.local.put(
@@ -127,8 +189,11 @@ class Users {
   /// cache for the user, and signs the user out.
   static Future<void> blockUser(Session session, int userId) async {
     var userInfo = await findUserByUserId(session, userId);
+    var authId = userInfo?.authId;
     if (userInfo == null) {
       throw 'userId $userId not found';
+    } else if (authId == null) {
+      throw 'authId on $userId not set';
     } else if (userInfo.blocked) {
       throw 'userId $userId already blocked';
     }
@@ -137,7 +202,7 @@ class Users {
     await session.db.updateRow(userInfo);
     await invalidateCacheForUser(session, userId);
     // Sign out user
-    await session.auth.signOutUser(userId: userId);
+    await ServerpodAuth.revokeAllRefreshTokens(session, authId);
   }
 
   /// Unblocks a user so that they can log in again.

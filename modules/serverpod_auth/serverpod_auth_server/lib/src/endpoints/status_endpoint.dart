@@ -17,7 +17,12 @@ class StatusEndpoint extends Endpoint {
 
   /// Signs out a user.
   Future<void> signOut(Session session) async {
-    await session.auth.signOutUser();
+    var tokenId = session.authInfo?.tokenId;
+
+    if (tokenId == null) return;
+
+    await session.auth.revokeRefreshToken(tokenId);
+    //await session.auth.signOutUser();
   }
 
   /// Gets the [UserInfo] for a signed in user, or null if the user is currently

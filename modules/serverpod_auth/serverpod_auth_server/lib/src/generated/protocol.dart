@@ -502,13 +502,30 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'List<String>',
         ),
         _i2.ColumnDefinition(
+          name: 'authId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
           name: 'blocked',
           columnType: _i2.ColumnType.boolean,
           isNullable: false,
           dartType: 'bool',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'serverpod_user_info_fk_0',
+          columns: ['authId'],
+          referenceTable: 'serverpod_auth_id',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        )
+      ],
       indexes: [
         _i2.IndexDefinition(
           indexName: 'serverpod_user_info_pkey',
